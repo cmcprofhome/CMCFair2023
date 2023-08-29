@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "CMCfair2023"
+version = "0.0.1"
+authors = [
+  { name="Konstantin Ostashenko", email="ostashenkokd@gmail.com" },
+]
+description = "CMC Fair 2023 bot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "adaptix>=3.0.0",
+    "pytelegrambotapi>=4.13.0",
+    "redis>=5.0.0",
+    "sqlalchemy>=2.0.20",
+    "psycopg[binary]>=3.1.10",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+
+[project.urls]
+"Homepage" = "https://github.com/Cub11k/CMCFair2023"
+
+[tool.setuptools.packages.find]
+include = ["fair"]
+namespaces = false
