@@ -3,6 +3,7 @@ token = "BOT_TOKEN"
 drop_pending = "BOT_DROP_PENDING"
 use_webhook = "BOT_USE_WEBHOOK"
 use_class_middlewares = "BOT_USE_CLASS_MIDDLEWARES"
+actions_timeout = "BOT_ACTIONS_TIMEOUT"
 
 logger.name = "BOT_LOGGER_NAME"
 logger.level = "BOT_LOGGER_LEVEL"
@@ -49,3 +50,16 @@ level = "LOGGER_LEVEL"
 stream = "LOGGER_STREAM"
 file_path = "LOGGER_FILE_PATH"
 format = "LOGGER_FORMAT"
+
+[messages]
+welcome = "MESSAGES_WELCOME"
+unregistered_help = "MESSAGES_UNREGISTERED_HELP"
+player_help = "MESSAGES_PLAYER_HELP"
+manager_help = "MESSAGES_MANAGER_HELP"
+unknown_error = "MESSAGES_UNKNOWN_ERROR"
+
+[buttons]
+reg_player = "BUTTONS_REG_PLAYER"
+reg_manager = "BUTTONS_REG_MANAGER"
+help = "BUTTONS_HELP"
+cancel = "BUTTONS_CANCEL"

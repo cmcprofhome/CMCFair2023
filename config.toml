@@ -3,6 +3,7 @@ token = "token"
 drop_pending = true
 use_webhook = false
 use_class_middlewares = true
+actions_timeout = 0.2
 
 logger.name = "BotLogger"
 logger.level = "INFO"
@@ -49,3 +50,16 @@ level = "INFO"
 stream = "stdout"
 file_path = "logs/fair.log"
 format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+[messages]
+welcome = "Welcome"
+unregistered_help = "Unregistered help"
+player_help = "Player help"
+manager_help = "Manager help"
+unknown_error = "Unknown error"
+
+[buttons]
+reg_player = "Register as player"
+reg_manager = "Register as manager"
+help = "Help"
+cancel = "Cancel"

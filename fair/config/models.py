@@ -41,6 +41,7 @@ class BotConfig:
     drop_pending: bool  # Drop pending updates on startup
     use_webhook: bool  # Use webhook, otherwise long polling
     use_class_middlewares: bool  # Use class middlewares if any
+    actions_timeout: float  # Timeout between user's actions in seconds
     logger: LoggerConfig  # Logger config for the bot
     allowed_updates: Optional[Union[list[str], Literal['ALL']]] = None  # by default all except chat_member
     state_storage: Optional[BotStateStorageConfig] = None  # Bot state storage config if any
@@ -59,8 +60,28 @@ class DBConfig:
 
 
 @dataclass
+class MessagesConfig:
+    welcome: str
+    unregistered_help: str
+    player_help: str
+    manager_help: str
+    anti_flood: str
+    unknown_error: str
+
+
+@dataclass
+class ButtonsConfig:
+    reg_player: str
+    reg_manager: str
+    help: str
+    cancel: str
+
+
+@dataclass
 class Config:
     bot: BotConfig
     db: DBConfig
     # Extra configs if any
     logger: LoggerConfig  # Logger config for the app
+    messages: MessagesConfig  # Messages text config
+    buttons: ButtonsConfig  # Buttons text config
