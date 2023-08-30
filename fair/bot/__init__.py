@@ -61,7 +61,7 @@ def setup_bot(
 
     add_custom_filters(bot)
     if bot_config.use_class_middlewares:
-        setup_middlewares(bot, messages.anti_flood, 0.2, db_adapter, messages, buttons, logger)
+        setup_middlewares(bot, messages.anti_flood, bot_config.actions_timeout, db_adapter, messages, buttons, logger)
     register_handlers(bot, buttons)
 
     return bot
