@@ -52,7 +52,7 @@ def setup_bot(bot_config: BotConfig):
     state_storage = setup_state_storage(bot_config.state_storage)
     bot = TeleBot(bot_config.token, state_storage=state_storage, use_class_middlewares=bot_config.use_class_middlewares)
 
-    add_custom_filters(bot)
+    add_custom_filters(bot, bot_config.owner_tg_id)
     if bot_config.use_class_middlewares:
         setup_middlewares(bot)
     register_handlers(bot)

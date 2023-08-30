@@ -1,4 +1,5 @@
 [bot]
+owner_tg_id = 123456789
 token = "token"
 drop_pending = true
 use_webhook = false
