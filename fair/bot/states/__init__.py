@@ -11,16 +11,15 @@ class UnregisteredStates(StatesGroup):
 
 class PlayerStates(StatesGroup):
     main_menu = State()
-    new_queue_location = State()
-    money_transfer_recipient = State()
-    money_transfer_amount = State()
+    choose_new_queue_location = State()
+    choose_money_transfer_recipient = State()
+    choose_money_transfer_amount = State()
 
 
 class ManagerStates(StatesGroup):
     main_menu = State()
     choose_location = State()
-    my_location_queue = State()
-    choose_from_queue = State()
+    choose_from_my_location_queue = State()
     choose_reward_recipient = State()
     choose_reward_amount = State()
     choose_add_recipient = State()
