@@ -1,8 +1,10 @@
+import logging
 from typing import Optional
 
 from telebot import TeleBot
 
-from fair.config import BotConfig, BotWebhookConfig
+from fair.config import BotConfig, BotWebhookConfig, MessagesConfig, ButtonsConfig
+from fair.db import DBAdapter
 
 from fair.bot.filters import add_custom_filters
 from fair.bot.handlers import register_handlers
@@ -48,13 +50,18 @@ def stop_bot(bot: TeleBot, use_webhook: bool):
         bot.stop_polling()
 
 
-def setup_bot(bot_config: BotConfig):
+def setup_bot(
+        bot_config: BotConfig,
+        db_adapter: DBAdapter,
+        messages: MessagesConfig,
+        buttons: ButtonsConfig,
+        logger: logging.Logger):
     state_storage = setup_state_storage(bot_config.state_storage)
     bot = TeleBot(bot_config.token, state_storage=state_storage, use_class_middlewares=bot_config.use_class_middlewares)
 
     add_custom_filters(bot, bot_config.owner_tg_id)
     if bot_config.use_class_middlewares:
-        setup_middlewares(bot)
-    register_handlers(bot)
+        setup_middlewares(bot, messages.anti_flood, bot_config.actions_timeout, db_adapter, messages, buttons, logger)
+    register_handlers(bot, buttons)
 
     return bot

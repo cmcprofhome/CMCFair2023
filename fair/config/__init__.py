@@ -5,7 +5,7 @@ from typing import Optional
 from adaptix import Retort
 
 from fair.config.models import (
-    Config, BotConfig, DBConfig, LoggerConfig,
+    Config, BotConfig, DBConfig, LoggerConfig, MessagesConfig, ButtonsConfig,
     BotWebhookConfig, BotStateStorageConfig, RedisConfig
 )
 
