@@ -1,4 +1,5 @@
 [bot]
+owner_tg_id = "BOT_OWNER_TG_ID"
 token = "BOT_TOKEN"
 drop_pending = "BOT_DROP_PENDING"
 use_webhook = "BOT_USE_WEBHOOK"

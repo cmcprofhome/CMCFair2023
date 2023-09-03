@@ -37,6 +37,7 @@ class BotWebhookConfig:
 
 @dataclass
 class BotConfig:
+    owner_tg_id: int  # Bot owner telegram id
     token: str  # Telegram bot token
     drop_pending: bool  # Drop pending updates on startup
     use_webhook: bool  # Use webhook, otherwise long polling
