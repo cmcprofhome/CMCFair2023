@@ -18,6 +18,9 @@ class PlayerStates(StatesGroup):
 
 class ManagerStates(StatesGroup):
     main_menu = State()
+    location_options = State()
+    location_player_chosen_options = State()
+    location_paused_options = State()
     choose_location = State()
     choose_from_my_location_queue = State()
     choose_reward_recipient = State()
