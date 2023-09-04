@@ -136,3 +136,11 @@ def reward_amount(cancel_btn: str) -> ReplyKeyboardMarkup:
                  KeyboardButton(text="50"), KeyboardButton(text="70"), KeyboardButton(text="100"))
     keyboard.row(KeyboardButton(text=cancel_btn))
     return keyboard
+
+
+def purchase_amount(cancel_btn: str) -> ReplyKeyboardMarkup:
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
+    keyboard.row(KeyboardButton(text="50"), KeyboardButton(text="100"), KeyboardButton(text="200"),
+                 KeyboardButton(text="300"), KeyboardButton(text="400"), KeyboardButton(text="500"))
+    keyboard.row(KeyboardButton(text=cancel_btn))
+    return keyboard
