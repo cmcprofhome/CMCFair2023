@@ -66,6 +66,7 @@ class MessagesConfig:
     unregistered_help: str
     player_help: str
     manager_help: str
+    owner_help: str
     anti_flood: str
     unknown_error: str
 
