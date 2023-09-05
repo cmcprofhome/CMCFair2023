@@ -2,6 +2,7 @@ from fair.config import DBConfig
 from fair.logger import setup_logger
 
 from fair.db.adapter import DBAdapter
+from fair.db.exceptions import DBError
 
 
 def setup_adapter(db_config: DBConfig):
