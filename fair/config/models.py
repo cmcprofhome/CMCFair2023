@@ -15,7 +15,7 @@ class LoggerConfig:
 class RedisConfig:
     host: str
     port: int
-    db: Optional[str] = None
+    db: Optional[int] = 0
     password: Optional[str] = None
     prefix: Optional[str] = 'telebot_'
 

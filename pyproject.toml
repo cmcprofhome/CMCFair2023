@@ -29,6 +29,5 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/Cub11k/CMCFair2023"
 
-[tool.setuptools.packages.find]
-include = ["fair"]
-namespaces = false
+[tool.setuptools]
+packages = ["fair"]
