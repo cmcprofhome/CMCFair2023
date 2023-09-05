@@ -96,24 +96,42 @@ def owner_help_handler(
 
 
 def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
-    bot.register_message_handler(start_handler, commands=['start'], state=[None])
-    bot.register_message_handler(unregistered_help_handler, commands=['help'], state=UnregisteredStates().state_list)
+    bot.register_message_handler(start_handler, commands=['start'], state=[None], pass_bot=True)
+    bot.register_message_handler(
+        unregistered_help_handler,
+        commands=['help'],
+        state=UnregisteredStates().state_list,
+        pass_bot=True
+    )
     bot.register_message_handler(
         unregistered_help_handler,
         text_equals=buttons.help,
-        state=UnregisteredStates().state_list
+        state=UnregisteredStates().state_list,
+        pass_bot=True
     )
-    bot.register_message_handler(player_help_handler, commands=['help'], state=PlayerStates().state_list)
+    bot.register_message_handler(
+        player_help_handler,
+        commands=['help'],
+        state=PlayerStates().state_list,
+        pass_bot=True
+    )
     bot.register_message_handler(
         player_help_handler,
         text_equals=buttons.help,
-        state=PlayerStates().state_list
+        state=PlayerStates().state_list,
+        pass_bot=True
     )
-    bot.register_message_handler(manager_help_handler, commands=['help'], state=ManagerStates().state_list)
+    bot.register_message_handler(
+        manager_help_handler,
+        commands=['help'],
+        state=ManagerStates().state_list,
+        pass_bot=True
+    )
     bot.register_message_handler(
         manager_help_handler,
         text_equals=buttons.help,
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
-    bot.register_message_handler(owner_help_handler, commands=['help'], is_owner=True)
-    bot.register_message_handler(owner_help_handler, text_equals=buttons.help, is_owner=True)
+    bot.register_message_handler(owner_help_handler, commands=['help'], is_owner=True, pass_bot=True)
+    bot.register_message_handler(owner_help_handler, text_equals=buttons.help, is_owner=True, pass_bot=True)
