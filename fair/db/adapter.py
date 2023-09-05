@@ -62,3 +62,54 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while updating telegram account username in database: {e}")
+
+    def add_user(self, role_name: str, tg_user_id: int, user_name: str) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                role_id = session.execute(
+                    select(Role.id)
+                    .where(Role.name == role_name)
+                ).first()
+                if role_id is None:
+                    raise DBError(f"Role with name '{role_name}' does not exist!")
+                tg_account_id = session.execute(
+                    select(TelegramAccount.id)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+                if tg_account_id is None:
+                    raise DBError(f"Telegram account with tg_user_id '{tg_user_id}' does not exist!")
+                session.execute(
+                    insert(User)
+                    .values(role_id=role_id, name=user_name, tg_account_id=tg_account_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding user to database: {e}")
+
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
+        try:
+            with self.session_maker() as session:
+                user = session.execute(
+                    select(User)
+                    .where(User.id == user_id)
+                ).first()
+            return user if user is None else user[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting user from database: {e}")
+
+    def get_user_by_tg_id(self, tg_user_id: int) -> Optional[User]:
+        try:
+            with self.session_maker() as session:
+                user = session.execute(
+                    select(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return user if user is None else user[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting user from database: {e}")
