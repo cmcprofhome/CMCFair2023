@@ -68,6 +68,7 @@ class MessagesConfig:
     manager_help: str
     owner_help: str
     anti_flood: str
+    add_tg_account_error: str
     unknown_error: str
 
 
