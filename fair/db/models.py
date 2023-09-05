@@ -25,7 +25,7 @@ class TelegramAccount(BaseModel):
     # Data columns
     tg_user_id = mapped_column(BigInteger, unique=True, nullable=False)
     tg_chat_id = mapped_column(BigInteger, unique=True, nullable=False)
-    tg_username = mapped_column(String(255), unique=True, nullable=True)
+    tg_username = mapped_column(String(255), nullable=True)
 
 
 class User(BaseModel):
