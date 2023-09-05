@@ -549,3 +549,64 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while removing queue from database: {e}")
+
+    def add_finished_location_by_player_id(self, player_id: int, location_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(FinishedLocation)
+                    .values(location_id=location_id, player_id=player_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding finished location to database: {e}")
+
+    def add_finished_location_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                session.execute(
+                    insert(FinishedLocation)
+                    .values(location_id=location_id, player_id=player_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding finished location to database: {e}")
+
+    def get_finished_locations_by_player_id(self, player_id: int) -> list[FinishedLocation]:
+        try:
+            with self.session_maker() as session:
+                finished_locations = session.execute(
+                    select(FinishedLocation)
+                    .where(FinishedLocation.player_id == player_id)
+                ).all()
+            return finished_locations
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting finished locations from database: {e}")
+
+    def get_finished_locations_by_tg_id(self, tg_user_id: int) -> list[FinishedLocation]:
+        try:
+            with self.session_maker() as session:
+                finished_locations = session.execute(
+                    select(FinishedLocation)
+                    .join(Player)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).all()
+            return finished_locations
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting finished locations from database: {e}")
