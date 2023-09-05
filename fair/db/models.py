@@ -92,6 +92,7 @@ class Location(BaseModel):
 
     # Data columns
     name = mapped_column(String(255), unique=True, nullable=False)
+    max_reward = mapped_column(Integer, default=100, nullable=False)
     is_onetime = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
