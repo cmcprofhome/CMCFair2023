@@ -113,3 +113,156 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting user from database: {e}")
+
+    def add_player(self, tg_user_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                user_id = (
+                    select(User.id)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                session.execute(
+                    insert(Player)
+                    .values(user_id=user_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding player to database: {e}")
+
+    def get_player_by_id(self, player_id: int) -> Optional[Player]:
+        try:
+            with self.session_maker() as session:
+                player = session.execute(
+                    select(Player)
+                    .where(Player.id == player_id)
+                ).first()
+            return player if player is None else player[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting player from database: {e}")
+
+    def get_player_by_tg_id(self, tg_user_id: int) -> Optional[Player]:
+        try:
+            with self.session_maker() as session:
+                player = session.execute(
+                    select(Player)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return player if player is None else player[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting player from database: {e}")
+
+    def get_all_players(self, offset: int, limit: int) -> list[Player]:
+        try:
+            with self.session_maker() as session:
+                players = session.execute(
+                    select(Player)
+                    .order_by(Player.id.asc())
+                    .offset(offset)
+                    .limit(limit)
+                ).all()
+            return players
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting all players from database: {e}")
+
+    def update_player_balance_by_id(self, player_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                result = session.execute(
+                    update(Player)
+                    .where(Player.id == player_id)
+                    .values(balance=Player.balance + amount)
+                ).rowcount
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating player balance by id in database: {e}")
+
+    def update_player_balance_by_tg_id(self, tg_user_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    update(Player)
+                    .where(Player.id == player_id)
+                    .values(balance=Player.balance + amount)
+                ).rowcount
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating player balance by tg_id in database: {e}")
+
+    def transfer_by_id(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                result = session.execute(
+                    update(Player)
+                    .where(Player.id == from_player_id)
+                    .values(balance=Player.balance - amount)
+                ).rowcount
+                if result != 0:
+                    result = session.execute(
+                        update(Player)
+                        .where(Player.id == to_player_id)
+                        .values(balance=Player.balance + amount)
+                    ).rowcount
+                if result == 0:
+                    session.rollback()
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while transferring money between players in database: {e}")
+
+    def transfer_by_tg_id(self, from_user_tg_id: int, to_user_tg_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                from_player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == from_user_tg_id)
+                ).scalar_subquery()
+                to_player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == to_user_tg_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    update(Player)
+                    .where(Player.id == from_player_id)
+                    .values(balance=Player.balance - amount)
+                ).rowcount
+                if result != 0:
+                    result = session.execute(
+                        update(Player)
+                        .where(Player.id == to_player_id)
+                        .values(balance=Player.balance + amount)
+                    ).rowcount
+                if result == 0:
+                    session.rollback()
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while transferring money between players in database: {e}")
