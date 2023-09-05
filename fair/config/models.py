@@ -67,6 +67,14 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    manager_registration_forbidden: str
+    manager_registration_disabled: str
+    get_manager_password: str
+    get_manager_name: str
+    invalid_manager_name: str
+    manager_name_already_taken: str
+    add_manager_error: str
+    manager_registered: str
     unknown_error: str
 
 
@@ -74,6 +82,11 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    list_all_players: str
+    list_all_locations: str
+    add_balance: str
+    subtract_balance: str
+    choose_location: str
     help: str
     cancel: str
 
