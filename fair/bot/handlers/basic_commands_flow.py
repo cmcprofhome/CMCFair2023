@@ -1,9 +1,13 @@
+from logging import Logger
+
 from telebot import TeleBot
 from telebot.types import Message
 
+from fair.config import MessagesConfig, ButtonsConfig
+from fair.db import DBAdapter, DBError
+
 from fair.bot import keyboards
 from fair.bot.states import UnregisteredStates, PlayerStates, ManagerStates
-from fair.config import MessagesConfig, ButtonsConfig
 
 
 # Basic commands
@@ -17,11 +21,42 @@ def start_handler(
         bot: TeleBot,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
+        db_adapter: DBAdapter,
+        logger: Logger,
         **kwargs):
-    bot.send_message(
-        message.chat.id, messages.welcome,
-        reply_markup=keyboards.reg_buttons(buttons.reg_player, buttons.reg_manager, buttons.help)
-    )
+    try:
+        tg_account = db_adapter.get_telegram_account(message.from_user.id)
+    except DBError as e:
+        logger.error(e)
+        bot.send_message(message.chat.id, messages.unknown_error)
+    else:
+        if tg_account is False:
+            try:
+                tg_account_added = db_adapter.add_telegram_account(
+                    message.from_user.id,
+                    message.chat.id,
+                    message.from_user.username
+                )
+            except DBError as e:
+                logger.error(e)
+                bot.send_message(message.chat.id, messages.unknown_error)
+            else:
+                if tg_account_added is False:
+                    logger.error(
+                        f'Constraints violation while adding telegram account:'
+                        f' {message.from_user.id}, {message.chat.id}, {message.from_user.username}'
+                    )
+                    bot.send_message(message.chat.id, messages.add_tg_account_error)
+                    return
+                else:
+                    logger.debug(
+                        f'Telegram account added:'
+                        f' {message.from_user.id}, {message.chat.id}, {message.from_user.username}'
+                    )
+        bot.send_message(
+            message.chat.id, messages.welcome,
+            reply_markup=keyboards.reg_buttons(buttons.reg_player, buttons.reg_manager, buttons.help)
+        )
 
 
 def unregistered_help_handler(
