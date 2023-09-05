@@ -266,3 +266,131 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while transferring money between players in database: {e}")
+
+    def add_manager(self, tg_user_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                user_id = (
+                    select(User.id)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                session.execute(
+                    insert(Manager)
+                    .values(user_id=user_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding manager to database: {e}")
+
+    def get_manager_by_id(self, manager_id: int) -> Optional[Manager]:
+        try:
+            with self.session_maker() as session:
+                manager = session.execute(
+                    select(Manager)
+                    .where(Manager.id == manager_id)
+                ).first()
+            return manager if manager is None else manager[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting manager from database: {e}")
+
+    def get_manager_by_tg_id(self, tg_user_id: int) -> Optional[Manager]:
+        try:
+            with self.session_maker() as session:
+                manager = session.execute(
+                    select(Manager)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return manager if manager is None else manager[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting manager from database: {e}")
+
+    def update_manager_location_by_id(self, manager_id: int, location_id: Optional[int] = None) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                result = session.execute(
+                    update(Manager)
+                    .where(Manager.id == manager_id)
+                    .values(location_id=location_id)
+                ).rowcount
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating manager location by id in database: {e}")
+
+    def update_manager_location_by_tg_id(self, tg_user_id: int, location_id: Optional[int] = None) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                manager_id = (
+                    select(Manager.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    update(Manager)
+                    .where(Manager.id == manager_id)
+                    .values(location_id=location_id)
+                ).rowcount
+            return result != 0
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating manager location by tg_id in database: {e}")
+
+    def add_managers_blacklist_record(self, tg_user_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                tg_account_id = (
+                    select(TelegramAccount.id)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                session.execute(
+                    insert(ManagersBlacklistRecord)
+                    .values(tg_account_id=tg_account_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding managers blacklist record to database: {e}")
+
+    def get_managers_blacklist_record(self, tg_user_id: int) -> Optional[ManagersBlacklistRecord]:
+        try:
+            with self.session_maker() as session:
+                record = session.execute(
+                    select(ManagersBlacklistRecord)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return record if record is None else record[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting managers blacklist record from database: {e}")
+
+    def delete_managers_blacklist_record(self, tg_user_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                tg_account_id = (
+                    select(TelegramAccount.id)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    delete(ManagersBlacklistRecord)
+                    .where(ManagersBlacklistRecord.tg_account_id == tg_account_id)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while removing managers blacklist record from database: {e}")
