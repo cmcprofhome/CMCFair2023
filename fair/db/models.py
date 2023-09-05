@@ -34,7 +34,7 @@ class User(BaseModel):
     # PK and FKs
     id = mapped_column(Integer, primary_key=True)
     role_id = mapped_column(ForeignKey("roles.id"), nullable=False)
-    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), nullable=False)
+    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), unique=True, nullable=False)
 
     # Data columns
     name = mapped_column(String(255), unique=True, nullable=False)
@@ -78,7 +78,7 @@ class ManagersBlacklistRecord(BaseModel):
 
     # PK and FKs
     id = mapped_column(Integer, primary_key=True)
-    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), nullable=False)
+    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), unique=True, nullable=False)
 
     # Relationships
     tg_account = relationship("TelegramAccount")
