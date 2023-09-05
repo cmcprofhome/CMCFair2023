@@ -420,3 +420,29 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting location from database: {e}")
+
+    def add_shop(self, location_id: int, name: str) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(Shop)
+                    .values(location_id=location_id, name=name)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding shop to database: {e}")
+
+    def get_shop_by_id(self, shop_id: int) -> Optional[Shop]:
+        try:
+            with self.session_maker() as session:
+                shop = session.execute(
+                    select(Shop)
+                    .where(Shop.id == shop_id)
+                ).first()
+            return shop if shop is None else shop[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting shop from database: {e}")
