@@ -16,33 +16,32 @@ class Role(BaseModel):
     name = mapped_column(String(255), unique=True, nullable=False)
 
 
-class User(BaseModel):
-    __tablename__ = 'users'
-
-    # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
-    role_id = mapped_column(ForeignKey("roles.id"), nullable=False)
-
-    # Data columns
-    name = mapped_column(String(255), unique=True, nullable=False)
-
-    # Relationships
-    role = relationship("Role")
-
-
 class TelegramAccount(BaseModel):
     __tablename__ = 'telegram_accounts'
 
     # PK and FKs
     id = mapped_column(Integer, primary_key=True)
-    user_id = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
 
     # Data columns
     tg_user_id = mapped_column(BigInteger, unique=True, nullable=False)
     tg_chat_id = mapped_column(BigInteger, unique=True, nullable=False)
     tg_username = mapped_column(String(255), unique=True, nullable=True)
 
-    user = relationship("User")
+
+class User(BaseModel):
+    __tablename__ = 'users'
+
+    # PK and FKs
+    id = mapped_column(Integer, primary_key=True)
+    role_id = mapped_column(ForeignKey("roles.id"), nullable=False)
+    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), nullable=False)
+
+    # Data columns
+    name = mapped_column(String(255), unique=True, nullable=False)
+
+    # Relationships
+    role = relationship("Role")
+    tg_account = relationship("TelegramAccount")
 
 
 class Player(BaseModel):
@@ -72,6 +71,17 @@ class Manager(BaseModel):
     # Relationships
     user = relationship("User")
     location = relationship("Location")
+
+
+class ManagersBlacklistRecord(BaseModel):
+    __tablename__ = 'managers_blacklist'
+
+    # PK and FKs
+    id = mapped_column(Integer, primary_key=True)
+    tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), nullable=False)
+
+    # Relationships
+    tg_account = relationship("TelegramAccount")
 
 
 class Location(BaseModel):
