@@ -394,3 +394,29 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while removing managers blacklist record from database: {e}")
+
+    def add_location(self, name: str, max_reward: int, is_onetime: bool) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(Location)
+                    .values(name=name, max_reward=max_reward, is_onetime=is_onetime)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding location to database: {e}")
+
+    def get_location_by_id(self, location_id: int) -> Optional[Location]:
+        try:
+            with self.session_maker() as session:
+                location = session.execute(
+                    select(Location)
+                    .where(Location.id == location_id)
+                ).first()
+            return location if location is None else location[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting location from database: {e}")
