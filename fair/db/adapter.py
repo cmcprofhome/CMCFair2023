@@ -610,3 +610,55 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting finished locations from database: {e}")
+
+    def add_transfer_record(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(TransferRecord)
+                    .values(from_player_id=from_player_id, to_player_id=to_player_id, amount=amount)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding transfer record to database: {e}")
+
+    def add_reward_record(self, player_id: int, location_id: int, manager_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(RewardRecord)
+                    .values(
+                        recipient_player_id=player_id,
+                        location_id=location_id,
+                        conducted_by_manager_id=manager_id,
+                        amount=amount
+                    )
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding reward record to database: {e}")
+
+    def add_purchase_record(self, player_id: int, shop_id: int, manager_id: int, amount: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(PurchaseRecord)
+                    .values(
+                        customer_player_id=player_id,
+                        shop_id=shop_id,
+                        conducted_by_manager_id=manager_id,
+                        amount=amount
+                    )
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding purchase record to database: {e}")
