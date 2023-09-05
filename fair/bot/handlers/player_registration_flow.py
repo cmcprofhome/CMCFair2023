@@ -26,7 +26,7 @@ def reg_player_handler(
         messages: MessagesConfig,
         **kwargs):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=keyboards.empty_inline())
-    bot.set_state(call.message.chat.id, UnregisteredStates.reg_player_name)
+    bot.set_state(call.from_user.id, UnregisteredStates.reg_player_name, call.message.chat.id)
     bot.send_message(call.message.chat.id, messages.get_player_name)
 
 
@@ -70,7 +70,7 @@ def player_name_handler(
             bot.delete_state(message.from_user.id, message.chat.id)
             bot.send_message(message.chat.id, messages.add_player_error)
         else:
-            bot.set_state(message.chat.id, PlayerStates.main_menu)
+            bot.set_state(message.from_user.id, PlayerStates.main_menu, message.chat.id)
             bot.send_message(
                 message.chat.id,
                 messages.player_registered,
