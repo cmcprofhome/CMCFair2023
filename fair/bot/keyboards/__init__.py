@@ -1,5 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import ReplyKeyboardRemove
 
 
 def reg_buttons(reg_player_btn: str, reg_manager_btn: str, help_btn: str) -> InlineKeyboardMarkup:
@@ -144,3 +145,15 @@ def purchase_amount(cancel_btn: str) -> ReplyKeyboardMarkup:
                  KeyboardButton(text="300"), KeyboardButton(text="400"), KeyboardButton(text="500"))
     keyboard.row(KeyboardButton(text=cancel_btn))
     return keyboard
+
+
+def empty_inline():
+    return InlineKeyboardMarkup()
+
+
+def empty_reply():
+    return ReplyKeyboardMarkup()
+
+
+def remove_reply():
+    return ReplyKeyboardRemove()
