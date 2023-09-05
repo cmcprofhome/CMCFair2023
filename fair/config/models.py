@@ -67,6 +67,11 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    get_player_name: str
+    invalid_player_name: str
+    player_name_already_taken: str
+    add_player_error: str
+    player_registered: str
     unknown_error: str
 
 
@@ -74,6 +79,9 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    new_queue: str
+    my_balance: str
+    transfer_money: str
     help: str
     cancel: str
 
