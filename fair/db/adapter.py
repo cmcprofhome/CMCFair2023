@@ -446,3 +446,106 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting shop from database: {e}")
+
+    def add_queue_by_player_id(self, player_id: int, location_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(Queue)
+                    .values(location_id=location_id, player_id=player_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding queue to database: {e}")
+
+    def add_queue_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                session.execute(
+                    insert(Queue)
+                    .values(location_id=location_id, player_id=player_id)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding queue to database: {e}")
+
+    def get_queue_by_player_id(self, player_id: int) -> Optional[Queue]:
+        try:
+            with self.session_maker() as session:
+                queue = session.execute(
+                    select(Queue)
+                    .where(Queue.player_id == player_id)
+                ).first()
+            return queue if queue is None else queue[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting queue from database: {e}")
+
+    def get_queue_by_tg_id(self, tg_user_id: int) -> Optional[Queue]:
+        try:
+            with self.session_maker() as session:
+                queue = session.execute(
+                    select(Queue)
+                    .join(Player)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return queue if queue is None else queue[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting queue from database: {e}")
+
+    def get_queues_by_location_id(self, location_id: int) -> list[Queue]:
+        try:
+            with self.session_maker() as session:
+                queues = session.execute(
+                    select(Queue)
+                    .where(Queue.location_id == location_id)
+                ).all()
+            return queues
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting queues from database: {e}")
+
+    def delete_queue_by_player_id(self, player_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                result = session.execute(
+                    delete(Queue)
+                    .where(Queue.player_id == player_id)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while removing queue from database: {e}")
+
+    def delete_queue_by_tg_id(self, tg_user_id: int) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                player_id = (
+                    select(Player.id)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    delete(Queue)
+                    .where(Queue.player_id == player_id)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while removing queue from database: {e}")
