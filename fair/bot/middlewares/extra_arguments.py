@@ -1,6 +1,5 @@
 import logging
 
-from telebot.types import Update
 from telebot.handler_backends import BaseMiddleware
 
 from fair.config import MessagesConfig, ButtonsConfig
@@ -16,12 +15,12 @@ class ExtraArgumentsMiddleware(BaseMiddleware):
         self.logger = logger
         self.update_types = ['message', 'callback_query']
 
-    def pre_process(self, message: Update, data: dict):
+    def pre_process(self, message, data: dict):
         # passing extra arguments to handlers
         data['db_adapter'] = self.db_adapter
         data['messages'] = self.messages
         data['buttons'] = self.buttons
         data['logger'] = self.logger
 
-    def post_process(self, message: Update, data: dict, exception: BaseException):
+    def post_process(self, message, data: dict, exception: BaseException):
         pass
