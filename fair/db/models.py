@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Integer, BigInteger, String, ForeignKey
+from sqlalchemy import Boolean, Integer, BigInteger, String, ForeignKey, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, mapped_column, relationship
 
 
@@ -52,7 +52,7 @@ class Player(BaseModel):
     user_id = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
 
     # Data columns
-    balance = mapped_column(Integer, default=0, nullable=False)
+    balance = mapped_column(Integer, CheckConstraint('balance >= 0'), default=0, nullable=False)
 
     # Relationships
     user = relationship("User")
@@ -92,7 +92,7 @@ class Location(BaseModel):
 
     # Data columns
     name = mapped_column(String(255), unique=True, nullable=False)
-    max_reward = mapped_column(Integer, default=100, nullable=False)
+    max_reward = mapped_column(Integer,  CheckConstraint('max_reward >= 0'), default=100, nullable=False)
     is_onetime = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
@@ -139,7 +139,7 @@ class TransferRecord(BaseModel):
     receiver_player_id = mapped_column(ForeignKey("players.id"), nullable=False)
 
     # Data columns
-    amount = mapped_column(Integer, nullable=False)
+    amount = mapped_column(Integer, CheckConstraint('amount >= 0'), nullable=False)
 
 
 class RewardRecord(BaseModel):
@@ -152,7 +152,7 @@ class RewardRecord(BaseModel):
     conducted_by_manager_id = mapped_column(ForeignKey("managers.id"), nullable=False)
 
     # Data columns
-    amount = mapped_column(Integer, nullable=False)
+    amount = mapped_column(Integer, CheckConstraint('amount >= 0'), nullable=False)
 
 
 class PurchaseRecord(BaseModel):
@@ -165,4 +165,4 @@ class PurchaseRecord(BaseModel):
     conducted_by_manager_id = mapped_column(ForeignKey("managers.id"), nullable=False)
 
     # Data columns
-    amount = mapped_column(Integer, nullable=False)
+    amount = mapped_column(Integer,  CheckConstraint('amount >= 0'), nullable=False)
