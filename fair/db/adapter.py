@@ -114,6 +114,18 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting user from database: {e}")
 
+    def check_player_name_availability(self, name: str) -> bool:
+        try:
+            with self.session_maker() as session:
+                result = session.execute(
+                    select(User)
+                    .where(User.name == name)
+                ).first()
+            return result is None
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while checking player name availability in database: {e}")
+
     def add_player(self, tg_user_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
@@ -266,6 +278,18 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while transferring money between players in database: {e}")
+
+    def check_manager_name_availability(self, name: str) -> bool:
+        try:
+            with self.session_maker() as session:
+                result = session.execute(
+                    select(User)
+                    .where(User.name == name)
+                ).first()
+            return result is None
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while checking manager name availability in database: {e}")
 
     def add_manager(self, tg_user_id: int) -> bool:
         try:
