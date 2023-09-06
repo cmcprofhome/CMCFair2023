@@ -31,12 +31,12 @@ def reg_manager_handler(
         logger: Logger,
         **kwargs):
     try:
-        in_manager_blacklist = db_adapter.get_manager_blacklist_record(call.from_user.id)
+        manager_blacklist_record = db_adapter.get_manager_blacklist_record(call.from_user.id)
     except DBError as e:
         logger.error(e)
         bot.send_message(call.message.chat.id, messages.unknown_error)
     else:
-        if in_manager_blacklist:
+        if manager_blacklist_record is not None:
             bot.send_message(call.message.chat.id, messages.manager_registration_forbidden)
         else:
             with bot.retrieve_data(bot.user.id, bot.user.id) as data:
