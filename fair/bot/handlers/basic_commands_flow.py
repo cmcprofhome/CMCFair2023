@@ -30,7 +30,7 @@ def start_handler(
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
     else:
-        if tg_account is False:
+        if tg_account is None:
             try:
                 tg_account_added = db_adapter.add_telegram_account(
                     message.from_user.id,
