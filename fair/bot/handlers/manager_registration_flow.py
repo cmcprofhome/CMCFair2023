@@ -35,6 +35,7 @@ def reg_manager_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(call.message.chat.id, messages.unknown_error)
+        return
     else:
         if manager_blacklist_record is not None:
             bot.send_message(call.message.chat.id, messages.manager_registration_forbidden)
@@ -78,6 +79,7 @@ def manager_password_handler(
                 except DBError as e:
                     logger.error(e)
                     bot.send_message(message.chat.id, messages.unknown_error)
+                    return
                 else:
                     bot.send_message(message.chat.id, messages.manager_registration_forbidden)
             else:
@@ -107,6 +109,7 @@ def manager_name_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        return
     else:
         if name_available is False:
             logger.debug(f"Manager name already exists: {message.text}")
@@ -131,6 +134,7 @@ def manager_name_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        return
     else:
         if manager_added is False:
             logger.error(
