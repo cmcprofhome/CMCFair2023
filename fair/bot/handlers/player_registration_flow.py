@@ -57,7 +57,21 @@ def player_name_handler(
             bot.send_message(message.chat.id, messages.player_name_already_taken)
             return
     try:
-        player_added = db_adapter.add_player(message.from_user.id, message.text)  # add both User and Player
+        user_added = db_adapter.add_user(message.from_user.id, message.text)  # add User
+    except DBError as e:
+        logger.error(e)
+        bot.send_message(message.chat.id, messages.unknown_error)
+        return
+    else:
+        if user_added is False:
+            logger.error(
+                f"Constraints violation while adding user:"
+                f" {message.from_user.id}, {message.text}"
+            )
+            bot.send_message(message.chat.id, messages.add_player_error)
+            return
+    try:
+        player_added = db_adapter.add_player(message.from_user.id)  # add Player
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
