@@ -51,6 +51,7 @@ def player_name_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        return
     else:
         if name_available is False:
             logger.debug(f"Player name already exists: {message.text}")
@@ -75,6 +76,7 @@ def player_name_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        return
     else:
         if player_added is False:
             logger.error(
