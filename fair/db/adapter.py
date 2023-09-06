@@ -3,7 +3,7 @@ from typing import Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from fair.db.exceptions import DBError
@@ -420,6 +420,22 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting location from database: {e}")
+
+    def get_all_locations(self, offset: int, limit: int) -> list[tuple[Location, int]]:
+        try:
+            with self.session_maker() as session:
+                locations = session.execute(
+                    select(Location, func.count(Queue.id))
+                    .outerjoin(Queue)
+                    .group_by(Location.id)
+                    .order_by(func.count(Queue.id).desc())
+                    .offset(offset)
+                    .limit(limit)
+                ).all()
+            return locations
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting all locations from database: {e}")
 
     def add_shop(self, location_id: int, name: str) -> bool:
         try:
