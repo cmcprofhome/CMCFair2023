@@ -29,6 +29,7 @@ def start_handler(
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        return
     else:
         if tg_account is None:
             try:
@@ -40,6 +41,7 @@ def start_handler(
             except DBError as e:
                 logger.error(e)
                 bot.send_message(message.chat.id, messages.unknown_error)
+                return
             else:
                 if tg_account_added is False:
                     logger.error(
