@@ -113,7 +113,21 @@ def manager_name_handler(
             bot.send_message(message.chat.id, messages.manager_name_already_taken)
             return
     try:
-        manager_added = db_adapter.add_manager(message.from_user.id, message.text)  # add both User and Manager
+        user_added = db_adapter.add_user("manager", message.from_user.id, message.text)  # add User
+    except DBError as e:
+        logger.error(e)
+        bot.send_message(message.chat.id, messages.unknown_error)
+        return
+    else:
+        if user_added is False:
+            logger.error(
+                f"Constraints violation while adding user:"
+                f" {message.from_user.id}, {message.text}"
+            )
+            bot.send_message(message.chat.id, messages.add_user_error)
+            return
+    try:
+        manager_added = db_adapter.add_manager(message.from_user.id)  # add Manager
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
