@@ -18,11 +18,9 @@ from fair.db.models import (
 
 
 class DBAdapter:
-    def __init__(self, user: str, password: str, host: str, port: int, database: str, logger: logging.Logger):
+    def __init__(self, session_maker: sessionmaker, logger: logging.Logger):
         self.logger = logger
-
-        self.engine = create_engine(f'postgresql+psycopg://{user}:{password}@{host}:{port}/{database}')
-        self.session_maker = sessionmaker(self.engine)
+        self.session_maker = session_maker
 
     def add_telegram_account(self, tg_user_id: int, tg_chat_id: int, tg_username: Optional[str] = None) -> bool:
         try:
