@@ -365,14 +365,30 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting manager from database: {e}")
 
-    def update_manager_location_by_id(self, manager_id: int, location_id: Optional[int] = None) -> bool:
+    def update_manager_location_by_id(self, manager_id: int, new_location_id: Optional[int] = None) -> bool:
         try:
             with self.session_maker.begin() as session:
+                if new_location_id is None:
+                    location_id = (
+                        select(Location.id)
+                        .join(Manager)
+                        .where(Manager.id == manager_id)
+                    ).scalar_subquery()
+                else:
+                    location_id = new_location_id
                 result = session.execute(
-                    update(Manager)
-                    .where(Manager.id == manager_id)
-                    .values(location_id=location_id)
+                    update(Location)
+                    .where(Location.id == location_id)
+                    .values(is_active=new_location_id is not None)
                 ).rowcount
+                if result != 0:
+                    result = session.execute(
+                        update(Manager)
+                        .where(Manager.id == manager_id)
+                        .values(location_id=new_location_id)
+                    ).rowcount
+                if result == 0:
+                    session.rollback()
             return result != 0
         except IntegrityError:
             return False
@@ -380,7 +396,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while updating manager location by id in database: {e}")
 
-    def update_manager_location_by_tg_id(self, tg_user_id: int, location_id: Optional[int] = None) -> bool:
+    def update_manager_location_by_tg_id(self, tg_user_id: int, new_location_id: Optional[int] = None) -> bool:
         try:
             with self.session_maker.begin() as session:
                 manager_id = (
@@ -389,11 +405,27 @@ class DBAdapter:
                     .join(TelegramAccount)
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).scalar_subquery()
+                if new_location_id is None:
+                    location_id = (
+                        select(Location.id)
+                        .join(Manager)
+                        .where(Manager.id == manager_id)
+                    ).scalar_subquery()
+                else:
+                    location_id = new_location_id
                 result = session.execute(
-                    update(Manager)
-                    .where(Manager.id == manager_id)
-                    .values(location_id=location_id)
+                    update(Location)
+                    .where(Location.id == location_id)
+                    .values(is_active=new_location_id is not None)
                 ).rowcount
+                if result != 0:
+                    result = session.execute(
+                        update(Manager)
+                        .where(Manager.id == manager_id)
+                        .values(location_id=new_location_id)
+                    ).rowcount
+                if result == 0:
+                    session.rollback()
             return result != 0
         except IntegrityError:
             return False
@@ -516,6 +548,97 @@ class DBAdapter:
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting all locations from database: {e}")
+
+    def get_all_locations_count(self) -> int:
+        try:
+            with self.session_maker() as session:
+                locations_cnt = session.execute(
+                    select(func.count(Location))
+                ).first()
+            return locations_cnt[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting all locations from database: {e}")
+
+    def get_all_active_locations(self, offset: int, limit: int) -> list[tuple[Location, int]]:
+        try:
+            with self.session_maker() as session:
+                locations = session.execute(
+                    select(Location, func.count(QueueEntry.id))
+                    .outerjoin(QueueEntry)
+                    .where(Location.is_active is True)
+                    .group_by(Location.id)
+                    .order_by(func.count(QueueEntry.id).desc())
+                    .offset(offset)
+                    .limit(limit)
+                ).all()
+            return [location_[0] for location_ in locations]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting all active locations from database: {e}")
+
+    def get_all_active_locations_count(self) -> int:
+        try:
+            with self.session_maker() as session:
+                locations_cnt = session.execute(
+                    select(func.count(Location))
+                    .where(Location.is_active is True)
+                ).first()
+            return locations_cnt[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting all locations from database: {e}")
+
+    def update_location_by_id(self, location_id: int, is_active: bool) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                result = session.execute(
+                    update(Location)
+                    .where(Location.id == location_id)
+                    .values(is_active=is_active)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating location by id in database: {e}")
+
+    def update_location_by_manager_id(self, manager_id: int, is_active: bool) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                location_id = (
+                    select(Location.id)
+                    .join(Manager)
+                    .where(Manager.id == manager_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    update(Location)
+                    .where(Location.id == location_id)
+                    .values(is_active=is_active)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating location by manager id in database: {e}")
+
+    def update_location_by_manager_tg_id(self, tg_user_id: int, is_active: bool) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                location_id = (
+                    select(Location.id)
+                    .join(Manager)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).scalar_subquery()
+                result = session.execute(
+                    update(Location)
+                    .where(Location.id == location_id)
+                    .values(is_active=is_active)
+                ).rowcount
+            return result != 0
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while updating location by manager tg_id in database: {e}")
 
     def add_shop(self, location_id: int, name: str) -> bool:
         try:

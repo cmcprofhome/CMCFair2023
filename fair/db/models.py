@@ -94,6 +94,7 @@ class Location(BaseModel):
     name = mapped_column(String(255), unique=True, nullable=False)
     max_reward = mapped_column(Integer,  CheckConstraint('max_reward >= 0'), default=100, nullable=False)
     is_onetime = mapped_column(Boolean, default=False, nullable=False)
+    is_active = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
     queue = relationship("QueueEntry")
