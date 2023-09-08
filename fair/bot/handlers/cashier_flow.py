@@ -30,17 +30,25 @@ def purchase_handler(
             player = db_adapter.get_player_by_id(current_player_id)
         except DBError as e:
             logger.error(e)
-            bot.send_message(call.message.chat.id, messages.unknown_error)
+            bot.send_message(message.chat.id, messages.unknown_error)
             return
         else:
             if player is not None:
                 amount = int(message.text)
-                if player.balance - amount > 0:
-                    db_adapter.update_player_balance_by_id(current_player_id, -int(message.text))
-                    bot.send_message(message.chat.id, messages.purchase_amount)                         # TODO: add purchase_amount message
-                    bot.set_state(message.from_user.id, ManagerStates.main_menu, message.chat.id)
+                try:
+                    balance_status = db_adapter.update_player_balance_by_id(current_player_id, -int(message.text))
+                except DBError as e:
+                    logger.error(e)
+                    bot.send_message(message.chat.id, messages.unknown_error)
+                    return
                 else:
-                    bot.send_message(message.chat.id, messages.bad_player_balance)                      # TODO: add bad_player_balance message
+                    if balance_status:
+                        bot.send_message(message.chat.id, messages.purchase_amount)                             # TODO: add purchase_amount message
+                        bot.set_state(message.from_user.id, ManagerStates.main_menu, message.chat.id)
+                    else:
+                        bot.send_message(message.chat.id, messages.bad_player_balance)                          # TODO: add bad_player_balance message
+            else:
+                bot.send_message(message.chat.id, messages.bad_chosen_player)                                   # TODO: add bad_player_balance message
 
 
 def register_handlers(bot: TeleBot):
