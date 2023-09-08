@@ -591,6 +591,40 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queues from database: {e}")
 
+    def get_queue_by_manager_id(self, manager_id: int, offset: int, limit: int) -> list[QueueEntry]:
+        try:
+            with self.session_maker() as session:
+                queue = session.execute(
+                    select(QueueEntry)
+                    .join(Manager)
+                    .where(Manager.id == manager_id)
+                    .order_by(QueueEntry.id.asc())
+                    .offset(offset)
+                    .limit(limit)
+                ).all()
+            return [queue_entry_[0] for queue_entry_ in queue]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting queues from database: {e}")
+
+    def get_queue_by_manager_tg_id(self, tg_user_id: int, offset: int, limit: int) -> list[QueueEntry]:
+        try:
+            with self.session_maker() as session:
+                queue = session.execute(
+                    select(QueueEntry)
+                    .join(Manager)
+                    .join(User)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                    .order_by(QueueEntry.id.asc())
+                    .offset(offset)
+                    .limit(limit)
+                ).all()
+            return [queue_entry_[0] for queue_entry_ in queue]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting queues from database: {e}")
+
     def delete_queue_entry_by_player_id(self, player_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
