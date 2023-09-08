@@ -182,7 +182,7 @@ class DBAdapter:
                     .offset(offset)
                     .limit(limit)
                 ).all()
-            return players
+            return [player_[0] for player_ in players]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting all players from database: {e}")
@@ -485,7 +485,7 @@ class DBAdapter:
                     .offset(offset)
                     .limit(limit)
                 ).all()
-            return locations
+            return [location_[0] for location_ in locations]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting all locations from database: {e}")
@@ -584,7 +584,7 @@ class DBAdapter:
                     select(QueueEntry)
                     .where(QueueEntry.location_id == location_id)
                 ).all()
-            return queues
+            return [queue_entry_[0] for queue_entry_ in queue]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queues from database: {e}")
@@ -660,7 +660,7 @@ class DBAdapter:
                     select(FinishedLocation)
                     .where(FinishedLocation.player_id == player_id)
                 ).all()
-            return finished_locations
+            return [finished_location_[0] for finished_location_ in finished_locations]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting finished locations from database: {e}")
@@ -675,7 +675,7 @@ class DBAdapter:
                     .join(TelegramAccount)
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).all()
-            return finished_locations
+            return [finished_location_[0] for finished_location_ in finished_locations]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting finished locations from database: {e}")
