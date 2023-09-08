@@ -70,12 +70,16 @@ class DBAdapter:
                 ).first()
                 if role_id is None:
                     raise DBError(f"Role with name '{role_name}' does not exist!")
+                else:
+                    role_id = role_id[0]
                 tg_account_id = session.execute(
                     select(TelegramAccount.id)
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).first()
                 if tg_account_id is None:
                     raise DBError(f"Telegram account with tg_user_id '{tg_user_id}' does not exist!")
+                else:
+                    tg_account_id = tg_account_id[0]
                 session.execute(
                     insert(User)
                     .values(role_id=role_id, name=user_name, tg_account_id=tg_account_id)
