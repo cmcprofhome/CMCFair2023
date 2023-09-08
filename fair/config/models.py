@@ -67,6 +67,13 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    player_balance: str
+    choose_money_transfer_recipient: str
+    choose_new_queue_location: str
+    player_queue_location: str
+    player_left_queue: str
+    player_not_found_error: str
+    player_not_in_queue_error: str
     unknown_error: str
 
 
@@ -74,6 +81,13 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    my_balance: str
+    transfer_money: str
+    new_queue: str
+    my_queue: str
+    leave_queue: str
+    prev_page: str
+    next_page: str
     help: str
     cancel: str
 
