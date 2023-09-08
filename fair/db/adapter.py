@@ -577,12 +577,15 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queue from database: {e}")
 
-    def get_queue_by_location_id(self, location_id: int) -> list[QueueEntry]:
+    def get_queue_by_location_id(self, location_id: int, offset: int, limit: int) -> list[QueueEntry]:
         try:
             with self.session_maker() as session:
                 queue = session.execute(
                     select(QueueEntry)
                     .where(QueueEntry.location_id == location_id)
+                    .order_by(QueueEntry.id.asc())
+                    .offset(offset)
+                    .limit(limit)
                 ).all()
             return [queue_entry_[0] for queue_entry_ in queue]
         except SQLAlchemyError as e:
