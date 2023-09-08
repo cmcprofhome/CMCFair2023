@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, insert, update, delete, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
