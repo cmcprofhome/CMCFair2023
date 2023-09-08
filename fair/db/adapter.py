@@ -525,6 +525,7 @@ class DBAdapter:
                 location = session.execute(
                     select(Location)
                     .join(Manager)
+                    .join(User)
                     .join(TelegramAccount)
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).first()
