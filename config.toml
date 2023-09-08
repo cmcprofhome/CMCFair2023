@@ -5,6 +5,7 @@ drop_pending = true
 use_webhook = false
 use_class_middlewares = true
 actions_timeout = 0.2
+page_size = 10
 
 logger.name = "BotLogger"
 logger.level = "INFO"

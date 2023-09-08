@@ -5,6 +5,7 @@ drop_pending = "BOT_DROP_PENDING"
 use_webhook = "BOT_USE_WEBHOOK"
 use_class_middlewares = "BOT_USE_CLASS_MIDDLEWARES"
 actions_timeout = "BOT_ACTIONS_TIMEOUT"
+page_size = "BOT_PAGE_SIZE"
 
 logger.name = "BOT_LOGGER_NAME"
 logger.level = "BOT_LOGGER_LEVEL"
