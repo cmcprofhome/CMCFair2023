@@ -12,7 +12,7 @@ from fair.db.models import (
     User, Player, Manager,
     ManagersBlacklistRecord,
     Location, Shop,
-    Queue, FinishedLocation,
+    QueueEntry, FinishedLocation,
     TransferRecord, RewardRecord, PurchaseRecord
 )
 
@@ -447,10 +447,10 @@ class DBAdapter:
         try:
             with self.session_maker() as session:
                 locations = session.execute(
-                    select(Location, func.count(Queue.id))
-                    .outerjoin(Queue)
+                    select(Location, func.count(QueueEntry.id))
+                    .outerjoin(QueueEntry)
                     .group_by(Location.id)
-                    .order_by(func.count(Queue.id).desc())
+                    .order_by(func.count(QueueEntry.id).desc())
                     .offset(offset)
                     .limit(limit)
                 ).all()
@@ -485,11 +485,11 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting shop from database: {e}")
 
-    def add_queue_by_player_id(self, player_id: int, location_id: int) -> bool:
+    def add_queue_entry_by_player_id(self, player_id: int, location_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 session.execute(
-                    insert(Queue)
+                    insert(QueueEntry)
                     .values(location_id=location_id, player_id=player_id)
                 )
             return True
@@ -499,7 +499,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while adding queue to database: {e}")
 
-    def add_queue_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
+    def add_queue_entry_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 player_id = (
@@ -509,7 +509,7 @@ class DBAdapter:
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).scalar_subquery()
                 session.execute(
-                    insert(Queue)
+                    insert(QueueEntry)
                     .values(location_id=location_id, player_id=player_id)
                 )
             return True
@@ -519,23 +519,23 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while adding queue to database: {e}")
 
-    def get_queue_by_player_id(self, player_id: int) -> Optional[Queue]:
+    def get_queue_entry_by_player_id(self, player_id: int) -> Optional[QueueEntry]:
         try:
             with self.session_maker() as session:
                 queue = session.execute(
-                    select(Queue)
-                    .where(Queue.player_id == player_id)
+                    select(QueueEntry)
+                    .where(QueueEntry.player_id == player_id)
                 ).first()
             return queue if queue is None else queue[0]
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queue from database: {e}")
 
-    def get_queue_by_tg_id(self, tg_user_id: int) -> Optional[Queue]:
+    def get_queue_entry_by_tg_id(self, tg_user_id: int) -> Optional[QueueEntry]:
         try:
             with self.session_maker() as session:
                 queue = session.execute(
-                    select(Queue)
+                    select(QueueEntry)
                     .join(Player)
                     .join(User)
                     .join(TelegramAccount)
@@ -546,31 +546,31 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queue from database: {e}")
 
-    def get_queues_by_location_id(self, location_id: int) -> list[Queue]:
+    def get_queue_by_location_id(self, location_id: int) -> list[QueueEntry]:
         try:
             with self.session_maker() as session:
-                queues = session.execute(
-                    select(Queue)
-                    .where(Queue.location_id == location_id)
+                queue = session.execute(
+                    select(QueueEntry)
+                    .where(QueueEntry.location_id == location_id)
                 ).all()
             return queues
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queues from database: {e}")
 
-    def delete_queue_by_player_id(self, player_id: int) -> bool:
+    def delete_queue_entry_by_player_id(self, player_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 result = session.execute(
-                    delete(Queue)
-                    .where(Queue.player_id == player_id)
+                    delete(QueueEntry)
+                    .where(QueueEntry.player_id == player_id)
                 ).rowcount
             return result != 0
         except SQLAlchemyError as e:
             self.logger.exception(e)
             raise DBError(f"Error occurred while removing queue from database: {e}")
 
-    def delete_queue_by_tg_id(self, tg_user_id: int) -> bool:
+    def delete_queue_entry_by_tg_id(self, tg_user_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 player_id = (
@@ -582,6 +582,8 @@ class DBAdapter:
                 result = session.execute(
                     delete(Queue)
                     .where(Queue.player_id == player_id)
+                    delete(QueueEntry)
+                    .where(QueueEntry.player_id == player_id)
                 ).rowcount
             return result != 0
         except SQLAlchemyError as e:
