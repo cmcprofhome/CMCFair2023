@@ -1,8 +1,7 @@
 import logging
-from typing import Optional
+from typing import Optional, Callable
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, insert, update, delete, func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from fair.db.exceptions import DBError
@@ -11,8 +10,15 @@ from fair.db.models import (
     User, Player, Manager,
     ManagersBlacklistRecord,
     Location, Shop,
-    QueueEntry, FinishedLocation,
-    TransferRecord, RewardRecord, PurchaseRecord
+    QueueEntry, FinishedLocation
+)
+from fair.db.operations import (
+    role, telegram_account,
+    user, player, manager,
+    managers_blacklist_record,
+    location, shop,
+    queue_entry, finished_location,
+    transfer_record, reward_record, purchase_record
 )
 
 
@@ -21,901 +27,227 @@ class DBAdapter:
         self.logger = logger
         self.session_maker = session_maker
 
-    def add_role(self, name: str) -> bool:
+    def _session_wrapper(self, method: Callable, *args, **kwargs):
+        try:
+            with self.session_maker() as session:
+                return method(session, *args, **kwargs)
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while {method.__name__}: {e}")
+
+    def _commit_session_wrapper(self, method: Callable, *args, **kwargs):
         try:
             with self.session_maker.begin() as session:
-                session.execute(
-                    insert(Role)
-                    .values(name=name)
-                )
-            return True
+                return method(session, *args, **kwargs)
         except IntegrityError:
             return False
         except SQLAlchemyError as e:
             self.logger.exception(e)
-            raise DBError(f"Error occurred while adding role to database: {e}")
+            raise DBError(f"Error occurred while {method.__name__}: {e}")
+
+    def add_role(self, name: str) -> bool:
+        return self._commit_session_wrapper(role.add, name)
 
     def delete_role_by_name(self, name: str) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    delete(Role)
-                    .where(Role.name == name)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while deleting role from database: {e}")
+        return self._commit_session_wrapper(role.delete_by_name, name)
 
     def add_telegram_account(self, tg_user_id: int, tg_chat_id: int, tg_username: Optional[str] = None) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(TelegramAccount)
-                    .values(tg_user_id=tg_user_id, tg_chat_id=tg_chat_id, tg_username=tg_username)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding telegram account to database: {e}")
+        return self._commit_session_wrapper(telegram_account.add, tg_user_id, tg_chat_id, tg_username)
 
     def get_telegram_account(self, tg_user_id: int) -> Optional[TelegramAccount]:
-        try:
-            with self.session_maker() as session:
-                account = session.execute(
-                    select(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return account if account is None else account[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting telegram account from database: {e}")
+        return self._session_wrapper(telegram_account.get, tg_user_id)
 
     def update_telegram_account_username(self, tg_user_id: int, tg_username: str) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                result = session.execute(
-                    update(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                    .values(tg_username=tg_username)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating telegram account username in database: {e}")
+        return self._commit_session_wrapper(telegram_account.add, tg_user_id, tg_username)
 
     def add_user(self, role_name: str, tg_user_id: int, user_name: str) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                role_id = session.execute(
-                    select(Role.id)
-                    .where(Role.name == role_name)
-                ).first()
-                if role_id is None:
-                    raise DBError(f"Role with name '{role_name}' does not exist!")
-                else:
-                    role_id = role_id[0]
-                tg_account_id = session.execute(
-                    select(TelegramAccount.id)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-                if tg_account_id is None:
-                    raise DBError(f"Telegram account with tg_user_id '{tg_user_id}' does not exist!")
-                else:
-                    tg_account_id = tg_account_id[0]
-                session.execute(
-                    insert(User)
-                    .values(role_id=role_id, name=user_name, tg_account_id=tg_account_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding user to database: {e}")
+        return self._commit_session_wrapper(user.add, role_name, tg_user_id, user_name)
 
     def get_user_by_id(self, user_id: int) -> Optional[User]:
-        try:
-            with self.session_maker() as session:
-                user = session.execute(
-                    select(User)
-                    .where(User.id == user_id)
-                ).first()
-            return user if user is None else user[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting user from database: {e}")
+        return self._session_wrapper(user.get_by_id, user_id)
 
     def get_user_by_tg_id(self, tg_user_id: int) -> Optional[User]:
-        try:
-            with self.session_maker() as session:
-                user = session.execute(
-                    select(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return user if user is None else user[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting user from database: {e}")
+        return self._session_wrapper(user.get_by_tg_id, tg_user_id)
 
     def check_player_name_availability(self, name: str) -> bool:
-        try:
-            with self.session_maker() as session:
-                result = session.execute(
-                    select(User)
-                    .where(User.name == name)
-                ).first()
-            return result is None
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while checking player name availability in database: {e}")
+        return self._session_wrapper(player.check_name_availability, name)
 
     def add_player(self, tg_user_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                user_id = (
-                    select(User.id)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                session.execute(
-                    insert(Player)
-                    .values(user_id=user_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding player to database: {e}")
+        return self._commit_session_wrapper(player.add, tg_user_id)
 
     def get_player_by_id(self, player_id: int) -> Optional[Player]:
-        try:
-            with self.session_maker() as session:
-                player = session.execute(
-                    select(Player)
-                    .where(Player.id == player_id)
-                ).first()
-            return player if player is None else player[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting player from database: {e}")
+        return self._session_wrapper(player.get_by_id, player_id)
 
     def get_player_by_tg_id(self, tg_user_id: int) -> Optional[Player]:
-        try:
-            with self.session_maker() as session:
-                player = session.execute(
-                    select(Player)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return player if player is None else player[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting player from database: {e}")
+        return self._session_wrapper(player.get_by_tg_id, tg_user_id)
 
     def get_all_players(self, offset: int, limit: int) -> list[Player]:
-        try:
-            with self.session_maker() as session:
-                players = session.execute(
-                    select(Player)
-                    .order_by(Player.id.asc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [player_[0] for player_ in players]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting all players from database: {e}")
+        return self._session_wrapper(player.get_all, offset, limit)
+
+    def get_all_players_count(self) -> int:
+        return self._session_wrapper(player.get_all_count)
 
     def update_player_balance_by_id(self, player_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                result = session.execute(
-                    update(Player)
-                    .where(Player.id == player_id)
-                    .values(balance=Player.balance + amount)
-                ).rowcount
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating player balance by id in database: {e}")
+        return self._commit_session_wrapper(player.update_balance_by_id, player_id, amount)
 
     def update_player_balance_by_tg_id(self, tg_user_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    update(Player)
-                    .where(Player.id == player_id)
-                    .values(balance=Player.balance + amount)
-                ).rowcount
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating player balance by tg_id in database: {e}")
+        return self._commit_session_wrapper(player.update_balance_by_tg_id, tg_user_id, amount)
 
     def transfer_by_player_id(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                result = session.execute(
-                    update(Player)
-                    .where(Player.id == from_player_id)
-                    .values(balance=Player.balance - amount)
-                ).rowcount
-                if result != 0:
-                    result = session.execute(
-                        update(Player)
-                        .where(Player.id == to_player_id)
-                        .values(balance=Player.balance + amount)
-                    ).rowcount
-                if result == 0:
-                    session.rollback()
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while transferring money between players in database: {e}")
+        transferred = self._commit_session_wrapper(player.transfer_by_id, from_player_id, to_player_id, amount)
+        if transferred:
+            try:
+                self.add_transfer_record(from_player_id, to_player_id, amount)
+            except DBError:
+                pass  # suppress error
+        return transferred
 
     def transfer_by_player_tg_id(self, from_user_tg_id: int, to_user_tg_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                from_player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == from_user_tg_id)
-                ).scalar_subquery()
-                to_player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == to_user_tg_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    update(Player)
-                    .where(Player.id == from_player_id)
-                    .values(balance=Player.balance - amount)
-                ).rowcount
-                if result != 0:
-                    result = session.execute(
-                        update(Player)
-                        .where(Player.id == to_player_id)
-                        .values(balance=Player.balance + amount)
-                    ).rowcount
-                if result == 0:
-                    session.rollback()
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while transferring money between players in database: {e}")
+        transferred = self._commit_session_wrapper(player.transfer_by_tg_id, from_user_tg_id, to_user_tg_id, amount)
+        if transferred:
+            try:
+                self.add_transfer_record(from_user_tg_id, to_user_tg_id, amount)
+            except DBError:
+                pass  # suppress error
+        return transferred
 
     def check_manager_name_availability(self, name: str) -> bool:
-        try:
-            with self.session_maker() as session:
-                result = session.execute(
-                    select(User)
-                    .where(User.name == name)
-                ).first()
-            return result is None
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while checking manager name availability in database: {e}")
+        return self._session_wrapper(manager.check_name_availability, name)
 
     def add_manager(self, tg_user_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                user_id = (
-                    select(User.id)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                session.execute(
-                    insert(Manager)
-                    .values(user_id=user_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding manager to database: {e}")
+        return self._commit_session_wrapper(manager.add, tg_user_id)
 
     def get_manager_by_id(self, manager_id: int) -> Optional[Manager]:
-        try:
-            with self.session_maker() as session:
-                manager = session.execute(
-                    select(Manager)
-                    .where(Manager.id == manager_id)
-                ).first()
-            return manager if manager is None else manager[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting manager from database: {e}")
+        return self._session_wrapper(manager.get_by_id, manager_id)
 
     def get_manager_by_tg_id(self, tg_user_id: int) -> Optional[Manager]:
-        try:
-            with self.session_maker() as session:
-                manager = session.execute(
-                    select(Manager)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return manager if manager is None else manager[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting manager from database: {e}")
+        return self._session_wrapper(manager.get_by_tg_id, tg_user_id)
 
     def update_manager_location_by_id(self, manager_id: int, new_location_id: Optional[int] = None) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                if new_location_id is None:
-                    location_id = (
-                        select(Location.id)
-                        .join(Manager)
-                        .where(Manager.id == manager_id)
-                    ).scalar_subquery()
-                else:
-                    location_id = new_location_id
-                result = session.execute(
-                    update(Location)
-                    .where(Location.id == location_id)
-                    .values(is_active=new_location_id is not None)
-                ).rowcount
-                if result != 0:
-                    result = session.execute(
-                        update(Manager)
-                        .where(Manager.id == manager_id)
-                        .values(location_id=new_location_id)
-                    ).rowcount
-                if result == 0:
-                    session.rollback()
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating manager location by id in database: {e}")
+        return self._commit_session_wrapper(manager.update_location_by_id, manager_id, new_location_id)
 
     def update_manager_location_by_tg_id(self, tg_user_id: int, new_location_id: Optional[int] = None) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                manager_id = (
-                    select(Manager.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                if new_location_id is None:
-                    location_id = (
-                        select(Location.id)
-                        .join(Manager)
-                        .where(Manager.id == manager_id)
-                    ).scalar_subquery()
-                else:
-                    location_id = new_location_id
-                result = session.execute(
-                    update(Location)
-                    .where(Location.id == location_id)
-                    .values(is_active=new_location_id is not None)
-                ).rowcount
-                if result != 0:
-                    result = session.execute(
-                        update(Manager)
-                        .where(Manager.id == manager_id)
-                        .values(location_id=new_location_id)
-                    ).rowcount
-                if result == 0:
-                    session.rollback()
-            return result != 0
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating manager location by tg_id in database: {e}")
+        return self._commit_session_wrapper(manager.update_location_by_tg_id, tg_user_id, new_location_id)
 
     def add_managers_blacklist_record(self, tg_user_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                tg_account_id = (
-                    select(TelegramAccount.id)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                session.execute(
-                    insert(ManagersBlacklistRecord)
-                    .values(tg_account_id=tg_account_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding managers blacklist record to database: {e}")
+        return self._commit_session_wrapper(managers_blacklist_record.add, tg_user_id)
 
     def get_managers_blacklist_record(self, tg_user_id: int) -> Optional[ManagersBlacklistRecord]:
-        try:
-            with self.session_maker() as session:
-                record = session.execute(
-                    select(ManagersBlacklistRecord)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return record if record is None else record[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting managers blacklist record from database: {e}")
+        return self._session_wrapper(managers_blacklist_record.get_by_tg_id, tg_user_id)
 
     def delete_managers_blacklist_record(self, tg_user_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                tg_account_id = (
-                    select(TelegramAccount.id)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    delete(ManagersBlacklistRecord)
-                    .where(ManagersBlacklistRecord.tg_account_id == tg_account_id)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while removing managers blacklist record from database: {e}")
+        return self._commit_session_wrapper(managers_blacklist_record.delete_by_tg_id, tg_user_id)
 
     def add_location(self, name: str, max_reward: int, is_onetime: bool) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(Location)
-                    .values(name=name, max_reward=max_reward, is_onetime=is_onetime)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding location to database: {e}")
+        return self._commit_session_wrapper(location.add, name, max_reward, is_onetime)
 
     def get_location_by_id(self, location_id: int) -> Optional[Location]:
-        try:
-            with self.session_maker() as session:
-                location = session.execute(
-                    select(Location)
-                    .where(Location.id == location_id)
-                ).first()
-            return location if location is None else location[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting location from database: {e}")
+        return self._session_wrapper(location.get_by_id, location_id)
 
     def get_location_by_manager_id(self, manager_id: int) -> Optional[Location]:
-        try:
-            with self.session_maker() as session:
-                location = session.execute(
-                    select(Location)
-                    .join(Manager)
-                    .where(Manager.id == manager_id)
-                ).first()
-            return location if location is None else location[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting location from database: {e}")
+        return self._session_wrapper(location.get_by_manager_id, manager_id)
 
     def get_location_by_manager_tg_id(self, tg_user_id: int) -> Optional[Location]:
-        try:
-            with self.session_maker() as session:
-                location = session.execute(
-                    select(Location)
-                    .join(Manager)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return location if location is None else location[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting location from database: {e}")
+        return self._session_wrapper(location.get_by_manager_tg_id, tg_user_id)
 
     def get_all_locations(self, offset: int, limit: int) -> list[tuple[Location, int]]:
-        try:
-            with self.session_maker() as session:
-                locations = session.execute(
-                    select(Location, func.count(QueueEntry.id))
-                    .outerjoin(QueueEntry)
-                    .group_by(Location.id)
-                    .order_by(func.count(QueueEntry.id).desc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [location_[0] for location_ in locations]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting all locations from database: {e}")
+        return self._session_wrapper(location.get_all, offset, limit)
 
     def get_all_locations_count(self) -> int:
-        try:
-            with self.session_maker() as session:
-                locations_cnt = session.execute(
-                    select(func.count(Location))
-                ).first()
-            return locations_cnt[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting all locations from database: {e}")
+        return self._session_wrapper(location.get_all_count)
 
     def get_all_active_locations(self, offset: int, limit: int) -> list[tuple[Location, int]]:
-        try:
-            with self.session_maker() as session:
-                locations = session.execute(
-                    select(Location, func.count(QueueEntry.id))
-                    .outerjoin(QueueEntry)
-                    .where(Location.is_active is True)
-                    .group_by(Location.id)
-                    .order_by(func.count(QueueEntry.id).desc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [location_[0] for location_ in locations]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting all active locations from database: {e}")
+        return self._session_wrapper(location.get_all_active, offset, limit)
 
     def get_all_active_locations_count(self) -> int:
-        try:
-            with self.session_maker() as session:
-                locations_cnt = session.execute(
-                    select(func.count(Location))
-                    .where(Location.is_active is True)
-                ).first()
-            return locations_cnt[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting all locations from database: {e}")
+        return self._session_wrapper(location.get_all_active_count)
 
     def update_location_by_id(self, location_id: int, is_active: bool) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                result = session.execute(
-                    update(Location)
-                    .where(Location.id == location_id)
-                    .values(is_active=is_active)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating location by id in database: {e}")
+        return self._commit_session_wrapper(location.update_by_id, location_id, is_active)
 
     def update_location_by_manager_id(self, manager_id: int, is_active: bool) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                location_id = (
-                    select(Location.id)
-                    .join(Manager)
-                    .where(Manager.id == manager_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    update(Location)
-                    .where(Location.id == location_id)
-                    .values(is_active=is_active)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating location by manager id in database: {e}")
+        return self._commit_session_wrapper(location.update_by_manager_id, manager_id, is_active)
 
     def update_location_by_manager_tg_id(self, tg_user_id: int, is_active: bool) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                location_id = (
-                    select(Location.id)
-                    .join(Manager)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    update(Location)
-                    .where(Location.id == location_id)
-                    .values(is_active=is_active)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while updating location by manager tg_id in database: {e}")
+        return self._commit_session_wrapper(location.update_by_manager_tg_id, tg_user_id, is_active)
 
     def add_shop(self, location_id: int, name: str) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(Shop)
-                    .values(location_id=location_id, name=name)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding shop to database: {e}")
+        return self._commit_session_wrapper(shop.add, location_id, name)
 
     def get_shop_by_id(self, shop_id: int) -> Optional[Shop]:
-        try:
-            with self.session_maker() as session:
-                shop = session.execute(
-                    select(Shop)
-                    .where(Shop.id == shop_id)
-                ).first()
-            return shop if shop is None else shop[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting shop from database: {e}")
+        return self._session_wrapper(shop.get_by_id, shop_id)
+
+    def get_shop_by_location_id(self, location_id: int) -> Optional[Shop]:
+        return self._session_wrapper(shop.get_by_location_id, location_id)
 
     def add_queue_entry_by_player_id(self, player_id: int, location_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(QueueEntry)
-                    .values(location_id=location_id, player_id=player_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding queue to database: {e}")
+        return self._commit_session_wrapper(queue_entry.add_by_player_id, player_id, location_id)
 
     def add_queue_entry_by_player_tg_id(self, tg_user_id: int, location_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                session.execute(
-                    insert(QueueEntry)
-                    .values(location_id=location_id, player_id=player_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding queue to database: {e}")
+        return self._commit_session_wrapper(queue_entry.add_by_player_tg_id, tg_user_id, location_id)
 
     def get_queue_entry_by_player_id(self, player_id: int) -> Optional[QueueEntry]:
-        try:
-            with self.session_maker() as session:
-                queue = session.execute(
-                    select(QueueEntry)
-                    .where(QueueEntry.player_id == player_id)
-                ).first()
-            return queue if queue is None else queue[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting queue from database: {e}")
+        return self._session_wrapper(queue_entry.get_by_player_id, player_id)
 
     def get_queue_entry_by_player_tg_id(self, tg_user_id: int) -> Optional[QueueEntry]:
-        try:
-            with self.session_maker() as session:
-                queue = session.execute(
-                    select(QueueEntry)
-                    .join(Player)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).first()
-            return queue if queue is None else queue[0]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting queue from database: {e}")
+        return self._session_wrapper(queue_entry.get_by_player_tg_id, tg_user_id)
 
     def get_queue_by_location_id(self, location_id: int, offset: int, limit: int) -> list[QueueEntry]:
-        try:
-            with self.session_maker() as session:
-                queue = session.execute(
-                    select(QueueEntry)
-                    .where(QueueEntry.location_id == location_id)
-                    .order_by(QueueEntry.id.asc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [queue_entry_[0] for queue_entry_ in queue]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting queues from database: {e}")
+        return self._session_wrapper(queue_entry.get_by_location_id, location_id, offset, limit)
 
     def get_queue_by_manager_id(self, manager_id: int, offset: int, limit: int) -> list[QueueEntry]:
-        try:
-            with self.session_maker() as session:
-                queue = session.execute(
-                    select(QueueEntry)
-                    .join(Manager)
-                    .where(Manager.id == manager_id)
-                    .order_by(QueueEntry.id.asc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [queue_entry_[0] for queue_entry_ in queue]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting queues from database: {e}")
+        return self._session_wrapper(queue_entry.get_by_manager_id, manager_id, offset, limit)
 
     def get_queue_by_manager_tg_id(self, tg_user_id: int, offset: int, limit: int) -> list[QueueEntry]:
-        try:
-            with self.session_maker() as session:
-                queue = session.execute(
-                    select(QueueEntry)
-                    .join(Manager)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                    .order_by(QueueEntry.id.asc())
-                    .offset(offset)
-                    .limit(limit)
-                ).all()
-            return [queue_entry_[0] for queue_entry_ in queue]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting queues from database: {e}")
+        return self._session_wrapper(queue_entry.get_by_manager_tg_id, tg_user_id, offset, limit)
 
     def delete_queue_entry_by_player_id(self, player_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                result = session.execute(
-                    delete(QueueEntry)
-                    .where(QueueEntry.player_id == player_id)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while removing queue from database: {e}")
+        return self._commit_session_wrapper(queue_entry.delete_by_player_id, player_id)
 
     def delete_queue_entry_by_player_tg_id(self, tg_user_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                result = session.execute(
-                    delete(QueueEntry)
-                    .where(QueueEntry.player_id == player_id)
-                ).rowcount
-            return result != 0
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while removing queue from database: {e}")
+        return self._commit_session_wrapper(queue_entry.delete_by_player_tg_id, tg_user_id)
 
     def add_finished_location_by_player_id(self, player_id: int, location_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(FinishedLocation)
-                    .values(location_id=location_id, player_id=player_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding finished location to database: {e}")
+        return self._commit_session_wrapper(finished_location.add_by_player_id, player_id, location_id)
 
     def add_finished_location_by_player_tg_id(self, tg_user_id: int, location_id: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                player_id = (
-                    select(Player.id)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).scalar_subquery()
-                session.execute(
-                    insert(FinishedLocation)
-                    .values(location_id=location_id, player_id=player_id)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding finished location to database: {e}")
+        return self._commit_session_wrapper(finished_location.add_by_player_tg_id, tg_user_id, location_id)
 
     def get_finished_locations_by_player_id(self, player_id: int) -> list[FinishedLocation]:
-        try:
-            with self.session_maker() as session:
-                finished_locations = session.execute(
-                    select(FinishedLocation)
-                    .where(FinishedLocation.player_id == player_id)
-                ).all()
-            return [finished_location_[0] for finished_location_ in finished_locations]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting finished locations from database: {e}")
+        return self._session_wrapper(finished_location.get_by_player_id, player_id)
 
     def get_finished_locations_by_player_tg_id(self, tg_user_id: int) -> list[FinishedLocation]:
-        try:
-            with self.session_maker() as session:
-                finished_locations = session.execute(
-                    select(FinishedLocation)
-                    .join(Player)
-                    .join(User)
-                    .join(TelegramAccount)
-                    .where(TelegramAccount.tg_user_id == tg_user_id)
-                ).all()
-            return [finished_location_[0] for finished_location_ in finished_locations]
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while getting finished locations from database: {e}")
+        return self._session_wrapper(finished_location.get_by_player_tg_id, tg_user_id)
 
     def add_transfer_record(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(TransferRecord)
-                    .values(from_player_id=from_player_id, to_player_id=to_player_id, amount=amount)
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding transfer record to database: {e}")
+        return self._commit_session_wrapper(transfer_record.add, from_player_id, to_player_id, amount)
 
     def add_reward_record(self, player_id: int, location_id: int, manager_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(RewardRecord)
-                    .values(
-                        recipient_player_id=player_id,
-                        location_id=location_id,
-                        conducted_by_manager_id=manager_id,
-                        amount=amount
-                    )
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding reward record to database: {e}")
+        return self._commit_session_wrapper(reward_record.add, player_id, location_id, manager_id, amount)
 
     def add_purchase_record(self, player_id: int, shop_id: int, manager_id: int, amount: int) -> bool:
-        try:
-            with self.session_maker.begin() as session:
-                session.execute(
-                    insert(PurchaseRecord)
-                    .values(
-                        customer_player_id=player_id,
-                        shop_id=shop_id,
-                        conducted_by_manager_id=manager_id,
-                        amount=amount
-                    )
-                )
-            return True
-        except IntegrityError:
-            return False
-        except SQLAlchemyError as e:
-            self.logger.exception(e)
-            raise DBError(f"Error occurred while adding purchase record to database: {e}")
+        return self._commit_session_wrapper(purchase_record.add, player_id, shop_id, manager_id, amount)
+
+    def purchase_by_player_id(self, player_id: int, manager_id: int, amount: int) -> bool:
+        balance_updated = self.update_player_balance_by_id(player_id, -amount)
+        if balance_updated:
+            try:
+                _location = self.get_location_by_manager_id(manager_id)
+                if _location:
+                    _shop = self.get_shop_by_location_id(_location.id)
+                    if _shop:
+                        self.add_purchase_record(player_id, _shop.id, manager_id, amount)
+            except DBError:
+                pass  # suppress error
+        return balance_updated
+
+    def reward_by_player_id(self, player_id: int, manager_id: int, amount: int) -> bool:
+        balance_updated = self.update_player_balance_by_id(player_id, amount)
+        if balance_updated:
+            try:
+                _location = self.get_location_by_manager_id(manager_id)
+                if _location:
+                    self.add_reward_record(player_id, _location.id, manager_id, amount)
+            except DBError:
+                pass  # suppress error
+        return balance_updated
