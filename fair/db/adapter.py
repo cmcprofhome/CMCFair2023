@@ -222,7 +222,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while updating player balance by tg_id in database: {e}")
 
-    def transfer_by_id(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
+    def transfer_by_player_id(self, from_player_id: int, to_player_id: int, amount: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 result = session.execute(
@@ -245,7 +245,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while transferring money between players in database: {e}")
 
-    def transfer_by_tg_id(self, from_user_tg_id: int, to_user_tg_id: int, amount: int) -> bool:
+    def transfer_by_player_tg_id(self, from_user_tg_id: int, to_user_tg_id: int, amount: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 from_player_id = (
@@ -529,7 +529,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while adding queue to database: {e}")
 
-    def add_queue_entry_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
+    def add_queue_entry_by_player_tg_id(self, tg_user_id: int, location_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 player_id = (
@@ -561,7 +561,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting queue from database: {e}")
 
-    def get_queue_entry_by_tg_id(self, tg_user_id: int) -> Optional[QueueEntry]:
+    def get_queue_entry_by_player_tg_id(self, tg_user_id: int) -> Optional[QueueEntry]:
         try:
             with self.session_maker() as session:
                 queue = session.execute(
@@ -603,7 +603,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while removing queue from database: {e}")
 
-    def delete_queue_entry_by_tg_id(self, tg_user_id: int) -> bool:
+    def delete_queue_entry_by_player_tg_id(self, tg_user_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 player_id = (
@@ -635,7 +635,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while adding finished location to database: {e}")
 
-    def add_finished_location_by_tg_id(self, tg_user_id: int, location_id: int) -> bool:
+    def add_finished_location_by_player_tg_id(self, tg_user_id: int, location_id: int) -> bool:
         try:
             with self.session_maker.begin() as session:
                 player_id = (
@@ -667,7 +667,7 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting finished locations from database: {e}")
 
-    def get_finished_locations_by_tg_id(self, tg_user_id: int) -> list[FinishedLocation]:
+    def get_finished_locations_by_player_tg_id(self, tg_user_id: int) -> list[FinishedLocation]:
         try:
             with self.session_maker() as session:
                 finished_locations = session.execute(
