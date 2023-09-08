@@ -67,6 +67,11 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    money_transfer_recipient_cancelled: str
+    choose_money_transfer_amount: str
+    money_transfer_success: str
+    money_transfer_recipient_not_chosen_error: str
+    money_transfer_amount_invalid_error: str
     unknown_error: str
 
 
@@ -74,6 +79,13 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    new_queue: str
+    my_queue: str
+    leave_queue: str
+    my_balance: str
+    transfer_money: str
+    prev_page: str
+    next_page: str
     help: str
     cancel: str
 
