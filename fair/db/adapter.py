@@ -21,6 +21,34 @@ class DBAdapter:
         self.logger = logger
         self.session_maker = session_maker
 
+    def add_role(self, name: str) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    insert(Role)
+                    .values(name=name)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while adding role to database: {e}")
+
+    def delete_role_by_name(self, name: str) -> bool:
+        try:
+            with self.session_maker.begin() as session:
+                session.execute(
+                    delete(Role)
+                    .where(Role.name == name)
+                )
+            return True
+        except IntegrityError:
+            return False
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while deleting role from database: {e}")
+
     def add_telegram_account(self, tg_user_id: int, tg_chat_id: int, tg_username: Optional[str] = None) -> bool:
         try:
             with self.session_maker.begin() as session:
