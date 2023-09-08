@@ -443,6 +443,33 @@ class DBAdapter:
             self.logger.exception(e)
             raise DBError(f"Error occurred while getting location from database: {e}")
 
+    def get_location_by_manager_id(self, manager_id: int) -> Optional[Location]:
+        try:
+            with self.session_maker() as session:
+                location = session.execute(
+                    select(Location)
+                    .join(Manager)
+                    .where(Manager.id == manager_id)
+                ).first()
+            return location if location is None else location[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting location from database: {e}")
+
+    def get_location_by_manager_tg_id(self, tg_user_id: int) -> Optional[Location]:
+        try:
+            with self.session_maker() as session:
+                location = session.execute(
+                    select(Location)
+                    .join(Manager)
+                    .join(TelegramAccount)
+                    .where(TelegramAccount.tg_user_id == tg_user_id)
+                ).first()
+            return location if location is None else location[0]
+        except SQLAlchemyError as e:
+            self.logger.exception(e)
+            raise DBError(f"Error occurred while getting location from database: {e}")
+
     def get_all_locations(self, offset: int, limit: int) -> list[tuple[Location, int]]:
         try:
             with self.session_maker() as session:
@@ -580,8 +607,6 @@ class DBAdapter:
                     .where(TelegramAccount.tg_user_id == tg_user_id)
                 ).scalar_subquery()
                 result = session.execute(
-                    delete(Queue)
-                    .where(Queue.player_id == player_id)
                     delete(QueueEntry)
                     .where(QueueEntry.player_id == player_id)
                 ).rowcount
