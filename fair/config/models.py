@@ -43,6 +43,7 @@ class BotConfig:
     use_webhook: bool  # Use webhook, otherwise long polling
     use_class_middlewares: bool  # Use class middlewares if any
     actions_timeout: float  # Timeout between user's actions in seconds
+    page_size: int  # Page size for pagination in inline keyboards
     logger: LoggerConfig  # Logger config for the bot
     allowed_updates: Optional[Union[list[str], Literal['ALL']]] = None  # by default all except chat_member
     state_storage: Optional[BotStateStorageConfig] = None  # Bot state storage config if any
