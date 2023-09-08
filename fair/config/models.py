@@ -67,6 +67,9 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    new_queue_location_cancelled: str
+    queue_entry_added: str
+    queue_entry_already_exists_error: str
     unknown_error: str
 
 
@@ -74,6 +77,12 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    my_queue: str
+    leave_queue: str
+    my_balance: str
+    transfer_money: str
+    prev_page: str
+    next_page: str
     help: str
     cancel: str
 
