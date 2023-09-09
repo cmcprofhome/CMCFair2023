@@ -1,10 +1,11 @@
 from logging import Logger
 
 from telebot import TeleBot
-from telebot.types import Message
+from telebot.types import Message, CallbackQuery
 
 from fair.config import MessagesConfig, ButtonsConfig
 from fair.db import DBAdapter, DBError
+from fair.utils import dummy_true
 
 from fair.bot import keyboards
 from fair.bot.states import UnregisteredStates, PlayerStates, ManagerStates
@@ -62,13 +63,13 @@ def start_handler(
 
 
 def unregistered_help_handler(
-        message: Message,
+        call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
         **kwargs):
     bot.send_message(
-        message.chat.id, messages.unregistered_help,
+        call.message.chat.id, messages.unregistered_help,
         reply_markup=keyboards.reg_buttons(buttons.reg_player, buttons.reg_manager, buttons.help)
     )
 
@@ -99,9 +100,10 @@ def owner_help_handler(
 
 def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     bot.register_message_handler(start_handler, commands=['start'], state=[None], pass_bot=True)
-    bot.register_message_handler(
+    bot.register_callback_query_handler(
         unregistered_help_handler,
-        commands=['help'],
+        func=dummy_true,
+        cb_data="help",
         state=UnregisteredStates().state_list,
         pass_bot=True
     )
