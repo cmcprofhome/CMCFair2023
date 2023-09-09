@@ -38,6 +38,7 @@ def money_transfer_recipient_page_handler(
         bot.answer_callback_query(call.id, text=messages.unknown_error)
         return
     else:
+        logger.debug(f"Player {call.from_user.id} is choosing a recipient for money transfer on page {page_idx}")
         keyboard = keyboards.collection_page(
             collection=players,
             collection_name="transfer_recipients",
@@ -54,7 +55,9 @@ def money_transfer_recipient_cancel_handler(
         call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
+        logger: Logger,
         **kwargs):
+    logger.debug(f"Player {call.from_user.id} cancelled choosing a recipient for money transfer")
     bot.set_state(call.from_user.id, PlayerStates.main_menu, call.message.chat.id)
     bot.edit_message_text(
         text=messages.money_transfer_recipient_cancelled,
@@ -69,8 +72,10 @@ def money_transfer_recipient_handler(
         bot: TeleBot,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
+        logger: Logger,
         **kwargs):
     recipient_player_id = call.data.split("#")[1]
+    logger.debug(f"Player {call.from_user.id} chose a recipient {recipient_player_id} for money transfer")
     bot.add_data(call.from_user.id, call.message.chat.id, recipient_player_id=recipient_player_id)
     bot.set_state(call.from_user.id, PlayerStates.choose_money_transfer_amount, call.message.chat.id)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=keyboards.empty_inline())
@@ -92,6 +97,7 @@ def money_transfer_amount_handler(
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         recipient_player_id = data.get("recipient_player_id")
     if recipient_player_id is None:
+        logger.debug(f"Player {message.from_user.id} is trying to transfer money without choosing a recipient")
         bot.send_message(
             chat_id=message.chat.id,
             text=messages.money_transfer_recipient_not_chosen_error,
@@ -112,9 +118,11 @@ def money_transfer_amount_handler(
             return
         else:
             if money_transferred is False:
+                logger.debug(f"Player {message.from_user.id} is trying to transfer money with invalid amount")
                 bot.send_message(chat_id=message.chat.id, text=messages.money_transfer_amount_invalid_error)
                 return
             else:
+                logger.debug(f"Player {message.from_user.id} transferred money to player {recipient_player_id}")
                 if queue_entry is None:
                     keyboard = keyboards.player_main_menu(
                         new_queue_btn=buttons.new_queue,
