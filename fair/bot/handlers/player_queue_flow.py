@@ -42,9 +42,11 @@ def new_queue_location_handler(
         return
     else:
         if queue_entry_added is False:
+            logger.debug(f"Player {call.from_user.id} is already in the queue of location {location_id}")
             bot.send_message(call.message.chat.id, messages.queue_entry_already_exists_error)
             return
         else:
+            logger.debug(f"Player {call.from_user.id} was added to the queue of location {location_id}")
             bot.set_state(call.message.from_user.id, PlayerStates.main_menu, call.message.chat.id)
             bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=keyboards.empty_inline())
             keyboard = keyboards.player_queue_menu(
@@ -75,6 +77,7 @@ def new_queue_locations_page_handler(
         bot.answer_callback_query(call.id, messages.unknown_error)
         return
     else:
+        logger.debug(f"Player {call.from_user.id} is viewing page {page_idx} of locations list")
         keyboard = keyboards.collection_page(
             collection=locations,
             collection_name="new_queue_locations",
@@ -91,7 +94,9 @@ def new_queue_location_cancel_handler(
         call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
+        logger: Logger,
         **kwargs):
+    logger.debug(f"Player {call.from_user.id} cancelled choosing new queue location")
     bot.set_state(call.message.from_user.id, PlayerStates.main_menu, call.message.chat.id)
     bot.edit_message_text(
         text=messages.new_queue_location_cancelled,
