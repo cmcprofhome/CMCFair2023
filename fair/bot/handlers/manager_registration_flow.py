@@ -38,11 +38,13 @@ def reg_manager_handler(
         return
     else:
         if manager_blacklist_record is not None:
+            logger.debug(f"{call.from_user.id} trying to register as a manager when in the blacklist")
             bot.send_message(call.message.chat.id, messages.manager_registration_forbidden)
         else:
             with bot.retrieve_data(bot.user.id, bot.user.id) as data:
                 manager_password = data.get("manager_password", None)
             if manager_password is None:
+                logger.debug(f"{call.from_user.id} trying to register as a manager when password is not set")
                 bot.send_message(call.message.chat.id, messages.manager_registration_disabled)
             else:
                 bot.edit_message_reply_markup(
@@ -67,9 +69,11 @@ def manager_password_handler(
     with bot.retrieve_data(bot.user.id, bot.user.id) as data:
         manager_password = data.get("manager_password", None)
     if manager_password is None:
+        logger.debug(f"{message.from_user.id} trying to register as a manager when password is not set")
         bot.send_message(message.chat.id, messages.manager_registration_disabled)
     else:
         if message.text == manager_password:
+            logger.debug(f"{message.from_user.id} trying to register as a manager, correct password")
             bot.set_state(message.from_user.id, UnregisteredStates.reg_manager_name, message.chat.id)
             bot.send_message(message.chat.id, messages.get_manager_name)
         else:
@@ -81,8 +85,10 @@ def manager_password_handler(
                     bot.send_message(message.chat.id, messages.unknown_error)
                     return
                 else:
+                    logger.debug(f"{message.from_user.id} trying to register as a manager is now in blacklist")
                     bot.send_message(message.chat.id, messages.manager_registration_forbidden)
             else:
+                logger.debug(f"{message.from_user.id} trying to register as a manager, incorrect password")
                 bot.set_state(message.from_user.id, UnregisteredStates.reg_manager_password, message.chat.id)
                 bot.add_data(message.from_user.id, message.chat.id, password_retries=password_retries + 1)
                 bot.send_message(message.chat.id, messages.get_manager_password)
@@ -129,6 +135,8 @@ def manager_name_handler(
             )
             bot.send_message(message.chat.id, messages.add_user_error)
             return
+        else:
+            logger.debug(f"User added: {message.from_user.id}, {message.text}")
     try:
         manager_added = db_adapter.add_manager(message.from_user.id)  # add Manager
     except DBError as e:
@@ -144,6 +152,7 @@ def manager_name_handler(
             bot.delete_state(message.from_user.id, message.chat.id)
             bot.send_message(message.chat.id, messages.add_manager_error)
         else:
+            logger.debug(f"Manager added: {message.from_user.id}, {message.text}")
             bot.set_state(message.chat.id, ManagerStates.main_menu)
             bot.send_message(
                 message.chat.id,
