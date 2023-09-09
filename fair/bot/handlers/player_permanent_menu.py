@@ -34,6 +34,7 @@ def my_balance_handler(
         return
     else:
         if player is None:
+            logger.debug(f"Player with tg_id {message.from_user.id} not found!")
             bot.send_message(message.chat.id, messages.player_not_found_error)
         else:
             bot.send_message(message.chat.id, messages.player_balance.format(player.balance))
@@ -56,6 +57,7 @@ def transfer_money_handler(
         bot.send_message(message.chat.id, messages.unknown_error)
         return
     else:
+        logger.debug(f"Player with tg_id {message.from_user.id} initiated money transfer")
         keyboard = keyboards.collection_page(
             collection=[(player.name, player.id) for player in players],
             collection_name='transfer_recipients',
@@ -86,6 +88,7 @@ def new_queue_handler(
         bot.send_message(message.chat.id, messages.unknown_error)
         return
     else:
+        logger.debug(f"Player with tg_id {message.from_user.id} initiated new queue")
         keyboard = keyboards.collection_page(
             collection=[(location.name, location.id) for location in locations],
             collection_name='new_queue_locations',
@@ -117,6 +120,7 @@ def my_queue_handler(
         return
     else:
         if location is None:
+            logger.debug("Player is not in queue, when trying to get his queue info")
             bot.send_message(message.chat.id, messages.player_not_in_queue_error)
         else:
             bot.send_message(
@@ -140,8 +144,10 @@ def leave_queue_handler(
         return
     else:
         if queue_entry_deleted is False:
+            logger.debug("Player is not in queue, when trying to leave it")
             bot.send_message(message.chat.id, messages.player_not_in_queue_error)
         else:
+            logger.debug(f"Player with tg_id {message.from_user.id} left queue")
             bot.send_message(message.chat.id, messages.player_left_queue)
 
 
