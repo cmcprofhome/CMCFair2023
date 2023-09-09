@@ -36,7 +36,7 @@ def purchase_handler(
             if player is not None:
                 amount = int(message.text)
                 try:
-                    balance_status = db_adapter.update_player_balance_by_id(current_player_id, -int(message.text))
+                    balance_status = db_adapter.purchase_by_player_id(current_player_id, -amount)
                 except DBError as e:
                     logger.error(e)
                     bot.send_message(message.chat.id, messages.unknown_error)
