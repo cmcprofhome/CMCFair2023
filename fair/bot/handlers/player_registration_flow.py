@@ -71,6 +71,8 @@ def player_name_handler(
             )
             bot.send_message(message.chat.id, messages.add_player_error)
             return
+        else:
+            logger.debug(f"User added: {message.from_user.id}, {message.text}")
     try:
         player_added = db_adapter.add_player(message.from_user.id)  # add Player
     except DBError as e:
@@ -86,6 +88,7 @@ def player_name_handler(
             bot.delete_state(message.from_user.id, message.chat.id)
             bot.send_message(message.chat.id, messages.add_player_error)
         else:
+            logger.debug(f"Player added: {message.from_user.id}")
             bot.set_state(message.from_user.id, PlayerStates.main_menu, message.chat.id)
             bot.send_message(
                 message.chat.id,
