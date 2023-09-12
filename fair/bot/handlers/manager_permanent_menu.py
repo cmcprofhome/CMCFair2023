@@ -5,6 +5,7 @@ from telebot.types import Message, CallbackQuery
 
 from fair.config import MessagesConfig, ButtonsConfig
 from fair.db import DBAdapter, DBError
+from fair.utils import dummy_true
 
 from fair.bot import keyboards
 from fair.bot.states import ManagerStates
@@ -236,7 +237,7 @@ def subtract_balance_handler(
 
 
 def reward_player_handler(
-        message: Message,
+        call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
@@ -248,15 +249,15 @@ def reward_player_handler(
         keyboard = create_recipients_keyboard(db_adapter, buttons, "reward_recipients", page_size)
     except DBError as e:
         logger.error(e)
-        bot.send_message(message.chat.id, messages.unknown_error)
+        bot.send_message(call.message.chat.id, messages.unknown_error)
         return
     else:
-        bot.set_state(message.from_user.id, ManagerStates.choose_reward_recipient, message.chat.id)
-        bot.send_message(message.chat.id, messages.choose_reward_recipient, reply_markup=keyboard)
+        bot.set_state(call.from_user.id, ManagerStates.choose_reward_recipient, call.message.chat.id)
+        bot.send_message(call.message.chat.id, messages.choose_reward_recipient, reply_markup=keyboard)
 
 
 def purchase_handler(
-        message: Message,
+        call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
@@ -268,11 +269,11 @@ def purchase_handler(
         keyboard = create_recipients_keyboard(db_adapter, buttons, "purchase_recipients", page_size)
     except DBError as e:
         logger.error(e)
-        bot.send_message(message.chat.id, messages.unknown_error)
+        bot.send_message(call.message.chat.id, messages.unknown_error)
         return
     else:
-        bot.set_state(message.from_user.id, ManagerStates.choose_purchase_recipient, message.chat.id)
-        bot.send_message(message.chat.id, messages.choose_purchase_recipient, reply_markup=keyboard)
+        bot.set_state(call.from_user.id, ManagerStates.choose_purchase_recipient, call.message.chat.id)
+        bot.send_message(call.message.chat.id, messages.choose_purchase_recipient, reply_markup=keyboard)
 
 
 def recipient_page_handler(
@@ -449,6 +450,86 @@ def leave_location_handler(
             )
 
 
+def register_recipient_handlers(bot: TeleBot):
+    bot.register_callback_query_handler(
+        recipient_page_handler,
+        func=dummy_true,
+        cb_data_pagination="add_balance_recipients_page",
+        state=ManagerStates.choose_add_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_cancel_handler,
+        func=dummy_true,
+        cb_data_pagination="add_balance_recipients_cancel",
+        state=ManagerStates.choose_add_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_handler,
+        func=dummy_true,
+        cb_data_pagination="add_balance_recipients",
+        state=ManagerStates.choose_add_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_page_handler,
+        func=dummy_true,
+        cb_data_pagination="subtract_balance_recipients_page",
+        state=ManagerStates.choose_subtract_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_cancel_handler,
+        func=dummy_true,
+        cb_data_pagination="subtract_balance_recipients_cancel",
+        state=ManagerStates.choose_subtract_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_handler,
+        func=dummy_true,
+        cb_data_pagination="subtract_balance_recipients",
+        state=ManagerStates.choose_subtract_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_page_handler,
+        func=dummy_true,
+        cb_data_pagination="reward_recipients_page",
+        state=ManagerStates.choose_reward_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_cancel_handler,
+        func=dummy_true,
+        cb_data_pagination="reward_recipients_cancel",
+        state=ManagerStates.choose_reward_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_page_handler,
+        func=dummy_true,
+        cb_data_pagination="purchase_recipients_page",
+        state=ManagerStates.choose_purchase_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_cancel_handler,
+        func=dummy_true,
+        cb_data_pagination="purchase_recipients_cancel",
+        state=ManagerStates.choose_purchase_recipient,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        recipient_handler,
+        func=dummy_true,
+        cb_data_pagination="purchase_recipients",
+        state=ManagerStates.choose_purchase_recipient,
+        pass_bot=True
+    )
+
+
 def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     bot.register_message_handler(
         list_all_players_handler,
@@ -456,9 +537,37 @@ def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
         state=ManagerStates().state_list,
         pass_bot=True
     )
+    bot.register_callback_query_handler(
+        all_players_page_handler,
+        func=dummy_true,
+        cb_data_pagination="players_page",
+        state=ManagerStates().state_list,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        all_players_cancel_handler,
+        func=dummy_true,
+        cb_data="players_cancel",
+        state=ManagerStates().state_list,
+        pass_bot=True
+    )
     bot.register_message_handler(
         list_all_locations_handler,
         text_equals=buttons.list_all_locations,
+        state=ManagerStates().state_list,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        all_locations_page_handler,
+        func=dummy_true,
+        cb_data_pagination="locations_page",
+        state=ManagerStates().state_list,
+        pass_bot=True
+    )
+    bot.register_callback_query_handler(
+        all_locations_cancel_handler,
+        func=dummy_true,
+        cb_data="locations_cancel",
         state=ManagerStates().state_list,
         pass_bot=True
     )
@@ -474,18 +583,21 @@ def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
         state=ManagerStates().state_list,
         pass_bot=True
     )
-    bot.register_message_handler(
+    bot.register_callback_query_handler(
         reward_player_handler,
-        text_equals=buttons.reward_player,
+        func=dummy_true,
+        cb_data="reward_player",
         state=ManagerStates().state_list,
         pass_bot=True
     )
-    bot.register_message_handler(
+    bot.register_callback_query_handler(
         purchase_handler,
-        text_equals=buttons.purchase,
+        func=dummy_true,
+        cb_data="purchase",
         state=ManagerStates().state_list,
         pass_bot=True
     )
+    register_recipient_handlers(bot)
     bot.register_message_handler(
         choose_location_handler,
         text_equals=buttons.choose_location,
