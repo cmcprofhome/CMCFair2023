@@ -59,7 +59,7 @@ def transfer_money_handler(
     else:
         logger.debug(f"Player with tg_id {message.from_user.id} initiated money transfer")
         keyboard = keyboards.collection_page(
-            collection=[(player.name, player.id) for player in players],
+            collection=[(player.user.name, player.id) for player in players],
             collection_name='transfer_recipients',
             page_idx=0,
             page_cnt=round(players_cnt / page_size + 0.5),
