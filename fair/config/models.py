@@ -67,7 +67,46 @@ class MessagesConfig:
     unregistered_help: str
     player_help: str
     manager_help: str
+    owner_help: str
     anti_flood: str
+    get_player_name: str
+    invalid_player_name: str
+    player_name_already_taken: str
+    player_registered: str
+    player_balance: str
+    choose_money_transfer_recipient: str
+    money_transfer_recipient_cancelled: str
+    choose_money_transfer_amount: str
+    money_transfer_success: str
+    choose_new_queue_location: str
+    new_queue_location_cancelled: str
+    queue_entry_added: str
+    player_queue_location: str
+    player_left_queue: str
+    manager_registration_forbidden: str
+    manager_registration_disabled: str
+    get_manager_password: str
+    get_manager_name: str
+    invalid_manager_name: str
+    manager_name_already_taken: str
+    manager_registered: str
+    all_players: str
+    all_players_cancelled: str
+    all_locations: str
+    all_locations_cancelled: str
+    choose_add_balance_recipient: str
+    add_balance_cancelled: str
+    choose_add_balance_amount: str
+    choose_subtract_balance_recipient: str
+    subtract_balance_cancelled: str
+    choose_subtract_balance_amount: str
+    choose_reward_recipient: str
+    reward_cancelled: str
+    choose_reward_amount: str
+    choose_purchase_recipient: str
+    purchase_cancelled: str
+    choose_purchase_amount: str
+    choose_location: str
     choose_location_cancelled: str
     location_updated: str
     chosen_location: str
@@ -76,9 +115,21 @@ class MessagesConfig:
     location_player_chosen_options: str
     location_paused: str
     location_unpaused: str
+    manager_my_location: str
+    manager_left_location: str
+    add_player_error: str
+    player_not_found_error: str
+    player_not_in_queue_error: str
+    queue_entry_already_exists_error: str
+    money_transfer_recipient_not_chosen_error: str
+    money_transfer_amount_invalid_error: str
+    add_manager_error: str
+    manager_not_on_location_error: str
     bad_location_error: str
     pause_location_error: str
     unpause_location_error: str
+    add_user_error: str
+    add_tg_account_error: str
     unknown_error: str
 
 
@@ -86,14 +137,22 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    new_queue: str
+    my_balance: str
+    transfer_money: str
+    my_queue: str
+    leave_queue: str
+    list_all_players: str
+    list_all_locations: str
+    add_balance: str
+    subtract_balance: str
     choose_location: str
-    my_location: str
-    leave_location: str
-    my_location_queue: str
     reward_player: str
     purchase: str
+    my_location: str
+    my_location_queue: str
+    leave_location: str
     pause_location: str
-    unpause_location: str
     prev_page: str
     next_page: str
     help: str
