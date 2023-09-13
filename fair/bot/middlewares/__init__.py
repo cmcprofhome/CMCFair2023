@@ -17,9 +17,10 @@ def setup_middlewares(
         db_adapter: DBAdapter,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
-        logger: logging.Logger):
+        logger: logging.Logger,
+        page_size: int):
     # setup all middlewares here
     bot.setup_middleware(MessageAntiFloodMiddleware(bot, timeout_message, timeout))
     bot.setup_middleware(CallbackQueryAntiFloodMiddleware(bot, timeout_message, timeout))
-    bot.setup_middleware(ExtraArgumentsMiddleware(db_adapter, messages, buttons, logger))
+    bot.setup_middleware(ExtraArgumentsMiddleware(db_adapter, messages, buttons, logger, page_size))
     pass
