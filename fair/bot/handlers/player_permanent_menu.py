@@ -112,8 +112,10 @@ def my_queue_handler(
     try:
         queue_entry = db_adapter.get_queue_entry_by_player_tg_id(message.from_user.id)
         location = None
+        queue_count = 0
         if queue_entry is not None:
             location = db_adapter.get_location_by_id(queue_entry.location_id)
+            queue_count = db_adapter.get_queue_count_by_location_id(queue_entry.location_id)
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
@@ -125,7 +127,7 @@ def my_queue_handler(
         else:
             bot.send_message(
                 message.chat.id,
-                messages.player_queue_location.format(location.name, len(location.queue))
+                messages.player_queue_location.format(location.name, queue_count)
             )
 
 
