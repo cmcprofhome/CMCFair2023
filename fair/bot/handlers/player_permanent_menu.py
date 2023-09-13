@@ -51,7 +51,7 @@ def transfer_money_handler(
         **kwargs):
     try:
         players = db_adapter.get_all_players(offset=0, limit=page_size)
-        players_cnt = db_adapter.get_players_count()
+        players_cnt = db_adapter.get_all_players_count()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
@@ -82,7 +82,7 @@ def new_queue_handler(
         **kwargs):
     try:
         locations = db_adapter.get_all_active_locations(offset=0, limit=page_size)
-        locations_cnt = db_adapter.get_active_locations_count()
+        locations_cnt = db_adapter.get_all_active_locations_count()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
@@ -125,7 +125,7 @@ def my_queue_handler(
         else:
             bot.send_message(
                 message.chat.id,
-                messages.player_queue_location.format(location.name, len(location.queues))
+                messages.player_queue_location.format(location.name, len(location.queue))
             )
 
 
