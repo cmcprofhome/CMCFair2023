@@ -25,6 +25,7 @@ def start_handler(
         db_adapter: DBAdapter,
         logger: Logger,
         **kwargs):
+    bot.set_state(message.from_user.id, UnregisteredStates.started, message.chat.id)
     try:
         tg_account = db_adapter.get_telegram_account(message.from_user.id)
     except DBError as e:
