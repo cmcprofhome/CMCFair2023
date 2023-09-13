@@ -1,7 +1,10 @@
 import argparse
 from typing import Optional
 
-from fair.config import load_config, Config
+from fair.config import load_config
+from fair.db import setup_adapter
+from fair.logger import setup_logger
+from fair.bot import setup_bot, launch_bot
 
 
 def define_arg_parser():
@@ -20,7 +23,11 @@ def define_arg_parser():
 
 def main(config_path: str, use_env_vars: bool, config_env_mapping_path: Optional[str] = None):
     cfg = load_config(config_path, use_env_vars, config_env_mapping_path)
-    print(cfg)
+    db_logger = setup_logger(cfg.db.logger)
+    db_adapter = setup_adapter(cfg.db, db_logger)
+    bot_logger = setup_logger(cfg.bot.logger)
+    bot = setup_bot(cfg.bot, db_adapter, cfg.messages, cfg.buttons, bot_logger)
+    launch_bot(bot, cfg.bot.drop_pending, cfg.bot.use_webhook, cfg.bot.allowed_updates, cfg.bot.webhook)
 
 
 if __name__ == '__main__':
