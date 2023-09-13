@@ -68,6 +68,17 @@ class MessagesConfig:
     player_help: str
     manager_help: str
     anti_flood: str
+    choose_location_cancelled: str
+    location_updated: str
+    chosen_location: str
+    my_location_queue: str
+    my_location_queue_cancelled: str
+    location_player_chosen_options: str
+    location_paused: str
+    location_unpaused: str
+    bad_location_error: str
+    pause_location_error: str
+    unpause_location_error: str
     unknown_error: str
 
 
@@ -75,6 +86,16 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    choose_location: str
+    my_location: str
+    leave_location: str
+    my_location_queue: str
+    reward_player: str
+    purchase: str
+    pause_location: str
+    unpause_location: str
+    prev_page: str
+    next_page: str
     help: str
     cancel: str
 
