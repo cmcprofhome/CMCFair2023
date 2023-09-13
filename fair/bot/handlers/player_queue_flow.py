@@ -79,7 +79,7 @@ def new_queue_locations_page_handler(
     else:
         logger.debug(f"Player {call.from_user.id} is viewing page {page_idx} of locations list")
         keyboard = keyboards.collection_page(
-            collection=locations,
+            collection=[(f"{location.name} - {queue}", location.id) for location, queue in locations],
             collection_name="new_queue_locations",
             page_idx=page_idx,
             page_cnt=locations_cnt // page_size + 1,
