@@ -31,7 +31,7 @@ def reg_manager_handler(
         logger: Logger,
         **kwargs):
     try:
-        manager_blacklist_record = db_adapter.get_manager_blacklist_record(call.from_user.id)
+        manager_blacklist_record = db_adapter.get_managers_blacklist_record(call.from_user.id)
     except DBError as e:
         logger.error(e)
         bot.send_message(call.message.chat.id, messages.unknown_error)
@@ -79,7 +79,7 @@ def manager_password_handler(
         else:
             if password_retries == 2:
                 try:
-                    db_adapter.add_manager_blacklist_record(message.from_user.id)
+                    db_adapter.add_managers_blacklist_record(message.from_user.id)
                 except DBError as e:
                     logger.error(e)
                     bot.send_message(message.chat.id, messages.unknown_error)
