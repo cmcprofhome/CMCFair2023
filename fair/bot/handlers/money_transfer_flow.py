@@ -32,7 +32,7 @@ def money_transfer_recipient_page_handler(
     page_idx = int(call.data.split("#")[1])
     try:
         players = db_adapter.get_all_players(offset=page_idx * page_size, limit=page_size)
-        players_cnt = db_adapter.get_players_count()
+        players_cnt = db_adapter.get_all_players_count()
     except DBError as e:
         logger.error(e)
         bot.answer_callback_query(call.id, text=messages.unknown_error)
