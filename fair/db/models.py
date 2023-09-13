@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Integer, BigInteger, String, ForeignKey, CheckConstraint
+from sqlalchemy import Boolean, Integer, BigInteger, String, Identity, ForeignKey, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, mapped_column, relationship
 
 
@@ -10,7 +10,7 @@ class Role(BaseModel):
     __tablename__ = 'roles'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
 
     # Data columns
     name = mapped_column(String(255), unique=True, nullable=False)
@@ -20,7 +20,7 @@ class TelegramAccount(BaseModel):
     __tablename__ = 'telegram_accounts'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
 
     # Data columns
     tg_user_id = mapped_column(BigInteger, unique=True, nullable=False)
@@ -32,12 +32,9 @@ class User(BaseModel):
     __tablename__ = 'users'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     role_id = mapped_column(ForeignKey("roles.id"), nullable=False)
     tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), unique=True, nullable=False)
-
-    # Data columns
-    name = mapped_column(String(255), unique=True, nullable=False)
 
     # Relationships
     role = relationship("Role")
@@ -48,10 +45,11 @@ class Player(BaseModel):
     __tablename__ = 'players'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_id = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
 
     # Data columns
+    name = mapped_column(String(255), unique=True, nullable=False)
     balance = mapped_column(Integer, CheckConstraint('balance >= 0'), default=0, nullable=False)
 
     # Relationships
@@ -64,9 +62,12 @@ class Manager(BaseModel):
     __tablename__ = 'managers'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     user_id = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
     location_id = mapped_column(ForeignKey("locations.id"), nullable=True)
+
+    # Data columns
+    name = mapped_column(String(255), unique=True, nullable=False)
 
     # Relationships
     user = relationship("User")
@@ -77,7 +78,7 @@ class ManagersBlacklistRecord(BaseModel):
     __tablename__ = 'managers_blacklist'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     tg_account_id = mapped_column(ForeignKey("telegram_accounts.id"), unique=True, nullable=False)
 
     # Relationships
@@ -88,7 +89,7 @@ class Location(BaseModel):
     __tablename__ = 'locations'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
 
     # Data columns
     name = mapped_column(String(255), unique=True, nullable=False)
@@ -104,7 +105,7 @@ class Shop(BaseModel):
     __tablename__ = 'shops'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     location_id = mapped_column(ForeignKey("locations.id"), unique=True, nullable=False)
 
     # Data columns
@@ -118,7 +119,7 @@ class QueueEntry(BaseModel):
     __tablename__ = 'queues'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     player_id = mapped_column(ForeignKey("players.id"), unique=True, nullable=False)
     location_id = mapped_column(ForeignKey("locations.id"), nullable=False)
 
@@ -135,7 +136,7 @@ class TransferRecord(BaseModel):
     __tablename__ = 'transfers_history'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     sender_player_id = mapped_column(ForeignKey("players.id"), nullable=False)
     receiver_player_id = mapped_column(ForeignKey("players.id"), nullable=False)
 
@@ -147,7 +148,7 @@ class RewardRecord(BaseModel):
     __tablename__ = 'rewards_history'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     recipient_player_id = mapped_column(ForeignKey("players.id"), nullable=False)
     location_id = mapped_column(ForeignKey("locations.id"), nullable=False)
     conducted_by_manager_id = mapped_column(ForeignKey("managers.id"), nullable=False)
@@ -160,7 +161,7 @@ class PurchaseRecord(BaseModel):
     __tablename__ = 'purchases_history'
 
     # PK and FKs
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, Identity(start=1, increment=1), primary_key=True)
     customer_player_id = mapped_column(ForeignKey("players.id"), nullable=False)
     shop_id = mapped_column(ForeignKey("shops.id"), nullable=False)
     conducted_by_manager_id = mapped_column(ForeignKey("managers.id"), nullable=False)

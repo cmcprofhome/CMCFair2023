@@ -54,7 +54,7 @@ def collection_page(
     # Each Callback data must be no longer than 64 bytes, choose collection name wisely.
     keyboard = InlineKeyboardMarkup()
     for entry in collection:
-        keyboard.row(InlineKeyboardButton(text=collection[0], callback_data=f"{collection_name}#{entry[1]}"))
+        keyboard.row(InlineKeyboardButton(text=entry[0], callback_data=f"{collection_name}#{entry[1]}"))
     control_btns = []
     if page_idx > 0:
         control_btns.append(

@@ -25,6 +25,7 @@ def start_handler(
         db_adapter: DBAdapter,
         logger: Logger,
         **kwargs):
+    bot.set_state(message.from_user.id, UnregisteredStates.started, message.chat.id)
     try:
         tg_account = db_adapter.get_telegram_account(message.from_user.id)
     except DBError as e:
@@ -62,7 +63,7 @@ def start_handler(
         )
 
 
-def unregistered_help_handler(
+def unregistered_help_button_handler(
         call: CallbackQuery,
         bot: TeleBot,
         messages: MessagesConfig,
@@ -70,6 +71,18 @@ def unregistered_help_handler(
         **kwargs):
     bot.send_message(
         call.message.chat.id, messages.unregistered_help,
+        reply_markup=keyboards.reg_buttons(buttons.reg_player, buttons.reg_manager, buttons.help)
+    )
+
+
+def unregistered_help_handler(
+        message: Message,
+        bot: TeleBot,
+        messages: MessagesConfig,
+        buttons: ButtonsConfig,
+        **kwargs):
+    bot.send_message(
+        message.chat.id, messages.unregistered_help,
         reply_markup=keyboards.reg_buttons(buttons.reg_player, buttons.reg_manager, buttons.help)
     )
 
@@ -101,7 +114,7 @@ def owner_help_handler(
 def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     bot.register_message_handler(start_handler, commands=['start'], state=[None], pass_bot=True)
     bot.register_callback_query_handler(
-        unregistered_help_handler,
+        unregistered_help_button_handler,
         func=dummy_true,
         cb_data="help",
         state=UnregisteredStates().state_list,
@@ -109,7 +122,7 @@ def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     )
     bot.register_message_handler(
         unregistered_help_handler,
-        text_equals=buttons.help,
+        commands=['help'],
         state=UnregisteredStates().state_list,
         pass_bot=True
     )

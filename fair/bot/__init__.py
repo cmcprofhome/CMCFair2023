@@ -18,6 +18,7 @@ def launch_bot(bot: TeleBot,
                allowed_updates: Optional[list[str]] = None,
                webhook_config: Optional[BotWebhookConfig] = None
                ):
+    bot.set_state(bot.user.id, 1, bot.user.id)
     if use_webhook:
         if webhook_config is None:
             raise ValueError('webhook_config is required if use_webhook is True')

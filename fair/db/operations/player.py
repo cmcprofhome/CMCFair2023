@@ -8,13 +8,13 @@ from fair.db.models import TelegramAccount, User, Player
 
 def check_name_availability(session: Session, name: str) -> bool:
     result = session.execute(
-        select(User)
-        .where(User.name == name)
+        select(Player.id)
+        .where(Player.name == name)
     ).first()
     return result is None
 
 
-def add(session: Session, tg_user_id: int) -> bool:
+def add(session: Session, tg_user_id: int, name: str) -> bool:
     user_id = (
         select(User.id)
         .join(TelegramAccount)
@@ -22,7 +22,7 @@ def add(session: Session, tg_user_id: int) -> bool:
     ).scalar_subquery()
     session.execute(
         insert(Player)
-        .values(user_id=user_id)
+        .values(user_id=user_id, name=name)
     )
     return True
 
@@ -57,7 +57,7 @@ def get_all(session: Session, offset: int, limit: int) -> list[Player]:
 
 def get_all_count(session: Session) -> int:
     players_cnt = session.execute(
-        select(func.count(Player))
+        select(func.count(Player.id))
     ).first()
     return players_cnt[0]
 

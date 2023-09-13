@@ -58,7 +58,7 @@ def player_name_handler(
             bot.send_message(message.chat.id, messages.player_name_already_taken)
             return
     try:
-        user_added = db_adapter.add_user("player", message.from_user.id, message.text)  # add User
+        user_added = db_adapter.add_user("player", message.from_user.id)  # add User
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
@@ -74,7 +74,7 @@ def player_name_handler(
         else:
             logger.debug(f"User added: {message.from_user.id}, {message.text}")
     try:
-        player_added = db_adapter.add_player(message.from_user.id)  # add Player
+        player_added = db_adapter.add_player(message.from_user.id, message.text)  # add Player
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)

@@ -4,6 +4,7 @@ from fair.bot.states.storage import setup_state_storage
 
 
 class UnregisteredStates(StatesGroup):
+    started = State()
     reg_player_name = State()
     reg_manager_password = State()
     reg_manager_name = State()
