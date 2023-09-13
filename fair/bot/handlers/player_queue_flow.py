@@ -33,7 +33,7 @@ def new_queue_location_handler(
         db_adapter: DBAdapter,
         logger: Logger,
         **kwargs):
-    location_id = call.data.split("#")[1]
+    location_id = int(call.data.split("#")[1])
     try:
         queue_entry_added = db_adapter.add_queue_entry_by_player_tg_id(call.from_user.id, location_id)
     except DBError as e:
