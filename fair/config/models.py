@@ -43,6 +43,7 @@ class BotConfig:
     use_webhook: bool  # Use webhook, otherwise long polling
     use_class_middlewares: bool  # Use class middlewares if any
     actions_timeout: float  # Timeout between user's actions in seconds
+    page_size: int  # Page size for pagination in inline keyboards
     logger: LoggerConfig  # Logger config for the bot
     allowed_updates: Optional[Union[list[str], Literal['ALL']]] = None  # by default all except chat_member
     state_storage: Optional[BotStateStorageConfig] = None  # Bot state storage config if any
@@ -66,15 +67,22 @@ class MessagesConfig:
     unregistered_help: str
     player_help: str
     manager_help: str
+    owner_help: str
     anti_flood: str
+    get_player_name: str
+    invalid_player_name: str
+    player_name_already_taken: str
+    player_registered: str
     manager_registration_forbidden: str
     manager_registration_disabled: str
     get_manager_password: str
     get_manager_name: str
     invalid_manager_name: str
     manager_name_already_taken: str
-    add_manager_error: str
     manager_registered: str
+    add_player_error: str
+    add_manager_error: str
+    add_tg_account_error: str
     unknown_error: str
 
 
@@ -82,6 +90,9 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    new_queue: str
+    my_balance: str
+    transfer_money: str
     list_all_players: str
     list_all_locations: str
     add_balance: str
