@@ -9,18 +9,6 @@ from fair.logger import setup_logger
 from fair.routes import setup_routes
 
 
-async def on_startup(app: Sanic):
-    bot = app.ctx.bot
-    cfg = app.ctx.bot_config
-    launch_bot(bot, cfg.drop_pending, cfg.use_webhook, cfg.allowed_updates, cfg.webhook)
-
-
-async def on_shutdown(app: Sanic):
-    bot = app.ctx.bot
-    cfg = app.ctx.bot_config
-    stop_bot(bot, cfg.use_webhook)
-
-
 def build_app() -> Sanic:
     app = Sanic("FairBotApp")
     config_path = os.environ.get('CONFIG_PATH', './config.toml')
@@ -35,6 +23,5 @@ def build_app() -> Sanic:
     app.ctx.bot = bot
 
     setup_routes(app)
-    app.before_server_start(on_startup)
-    app.after_server_stop(on_shutdown)
+    launch_bot(bot, cfg.bot.drop_pending, cfg.bot.use_webhook, cfg.bot.allowed_updates, cfg.bot.webhook)
     return app
