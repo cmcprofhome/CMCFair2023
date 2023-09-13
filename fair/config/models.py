@@ -89,6 +89,7 @@ class MessagesConfig:
     player_not_found_error: str
     player_not_in_queue_error: str
     add_manager_error: str
+    add_user_error: str
     add_tg_account_error: str
     unknown_error: str
 

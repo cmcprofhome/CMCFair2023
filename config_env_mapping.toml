@@ -80,6 +80,7 @@ add_player_error = "MESSAGES_ADD_PLAYER_ERROR"
 player_not_found_error = "MESSAGES_PLAYER_NOT_FOUND_ERROR"
 player_not_in_queue_error = "MESSAGES_PLAYER_NOT_IN_QUEUE_ERROR"
 add_manager_error = "MESSAGES_ADD_MANAGER_ERROR"
+add_user_error = "MESSAGES_ADD_USER_ERROR"
 add_tg_account_error = "MESSAGES_ADD_TG_ACCOUNT_ERROR"
 unknown_error = "MESSAGES_UNKNOWN_ERROR"
 
