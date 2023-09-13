@@ -77,6 +77,32 @@ def get_by_manager_tg_id(session: Session, tg_user_id: int, offset: int, limit: 
     return get_by_location_id(session, location_id, offset, limit)
 
 
+def get_count_by_location_id(session: Session, location_id: Union[int, ScalarSelect]) -> int:
+    queue_cnt = session.execute(
+        select(func.count(QueueEntry.id))
+        .where(QueueEntry.location_id == location_id)
+    ).first()
+    return queue_cnt[0]
+
+
+def get_count_by_manager_id(session: Session, manager_id: int) -> int:
+    location_id = (
+        select(Manager.location_id)
+        .where(Manager.id == manager_id)
+    ).scalar_subquery()
+    return get_count_by_location_id(session, location_id)
+
+
+def get_count_by_manager_tg_id(session: Session, tg_user_id: int) -> int:
+    location_id = (
+        select(Manager.location_id)
+        .join(User)
+        .join(TelegramAccount)
+        .where(TelegramAccount.tg_user_id == tg_user_id)
+    ).scalar_subquery()
+    return get_count_by_location_id(session, location_id)
+
+
 def delete_by_player_id(session: Session, player_id: Union[int, ScalarSelect]) -> bool:
     result = session.execute(
         delete(QueueEntry)
