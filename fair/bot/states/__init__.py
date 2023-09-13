@@ -25,6 +25,8 @@ class ManagerStates(StatesGroup):
     choose_from_my_location_queue = State()
     choose_reward_recipient = State()
     choose_reward_amount = State()
+    choose_purchase_recipient = State()
+    choose_purchase_amount = State()
     choose_add_recipient = State()
     choose_add_amount = State()
     choose_subtract_recipient = State()

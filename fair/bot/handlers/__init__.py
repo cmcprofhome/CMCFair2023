@@ -9,6 +9,7 @@ from fair.bot.handlers import (
     player_permanent_menu,
     player_queue_flow,
     money_transfer_flow,
+    manager_permanent_menu,
 )
 
 
@@ -20,3 +21,4 @@ def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     player_permanent_menu.register_handlers(bot, buttons)
     player_queue_flow.register_handlers(bot)
     money_transfer_flow.register_handlers(bot)
+    manager_permanent_menu.register_handlers(bot, buttons)
