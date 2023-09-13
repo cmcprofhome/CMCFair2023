@@ -15,6 +15,4 @@ async def handle_telegram_update(request: Request):
 
 
 def setup_routes(app: Sanic):
-    webhook_url = app.ctx.bot_config.webhook.url
-    webhook_path = webhook_url.split('/', maxsplit=1)[-1]
-    app.add_route(handle_telegram_update, webhook_path, methods=['POST'])
+    app.add_route(handle_telegram_update, '/' + app.ctx.bot_config.token, methods=['POST'])
