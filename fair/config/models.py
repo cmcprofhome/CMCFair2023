@@ -153,6 +153,7 @@ class ButtonsConfig:
     my_location_queue: str
     leave_location: str
     pause_location: str
+    unpause_location: str
     prev_page: str
     next_page: str
     help: str
