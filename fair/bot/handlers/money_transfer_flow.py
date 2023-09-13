@@ -40,7 +40,7 @@ def money_transfer_recipient_page_handler(
     else:
         logger.debug(f"Player {call.from_user.id} is choosing a recipient for money transfer on page {page_idx}")
         keyboard = keyboards.collection_page(
-            collection=[(player.user.name, player.id) for player in players],
+            collection=[(player.name, player.id) for player in players],
             collection_name="transfer_recipients",
             page_idx=page_idx,
             page_cnt=round(players_cnt // page_size + 0.5),

@@ -41,7 +41,7 @@ def list_all_players_handler(
         bot.send_message(message.chat.id, messages.unknown_error)
         return
     else:
-        collection = list((player.user.name, player.id) for player in players)
+        collection = list((player.name, player.id) for player in players)
         keyboard = keyboards.collection_page(
             collection=collection,
             collection_name="players",
@@ -72,7 +72,7 @@ def all_players_page_handler(
         bot.send_message(call.message.chat.id, messages.unknown_error)
         return
     else:
-        collection = list((player.user.name, player.id) for player in players)
+        collection = list((player.name, player.id) for player in players)
         keyboard = keyboards.collection_page(
             collection=collection,
             collection_name="players",
@@ -183,7 +183,7 @@ def all_locations_cancel_handler(
 def create_recipients_keyboard(db_adapter: DBAdapter, buttons: ButtonsConfig, collection_name: str, page_size: int):
     players = db_adapter.get_all_players(offset=0, limit=page_size)
     players_cnt = db_adapter.get_all_players_count()
-    collection = list((player.user.name, player.id) for player in players)
+    collection = list((player.name, player.id) for player in players)
     keyboard = keyboards.collection_page(
         collection=collection,
         collection_name=collection_name,
@@ -295,7 +295,7 @@ def recipient_page_handler(
         bot.send_message(call.message.chat.id, messages.unknown_error)
         return
     else:
-        collection = list((player.user.name, player.id) for player in players)
+        collection = list((player.name, player.id) for player in players)
         keyboard = keyboards.collection_page(
             collection=collection,
             collection_name=collection_name,
