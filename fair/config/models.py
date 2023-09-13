@@ -69,6 +69,11 @@ class MessagesConfig:
     manager_help: str
     owner_help: str
     anti_flood: str
+    get_player_name: str
+    invalid_player_name: str
+    player_name_already_taken: str
+    player_registered: str
+    add_player_error: str
     add_tg_account_error: str
     unknown_error: str
 
@@ -77,6 +82,9 @@ class MessagesConfig:
 class ButtonsConfig:
     reg_player: str
     reg_manager: str
+    new_queue: str
+    my_balance: str
+    transfer_money: str
     help: str
     cancel: str
 
