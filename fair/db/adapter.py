@@ -39,7 +39,8 @@ class DBAdapter:
         try:
             with self.session_maker.begin() as session:
                 return method(session, *args, **kwargs)
-        except IntegrityError:
+        except IntegrityError as e:
+            self.logger.debug(e)
             return False
         except SQLAlchemyError as e:
             self.logger.exception(e)
