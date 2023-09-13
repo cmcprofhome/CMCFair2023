@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from fair.db.models import Role, TelegramAccount, User
 
 
-def add(session: Session, role_name: str, tg_user_id: int, user_name: str) -> bool:
+def add(session: Session, role_name: str, tg_user_id: int) -> bool:
     role_id = (
         select(Role.id)
         .where(Role.name == role_name)
@@ -17,7 +17,7 @@ def add(session: Session, role_name: str, tg_user_id: int, user_name: str) -> bo
     ).scalar_subquery()
     session.execute(
         insert(User)
-        .values(role_id=role_id, name=user_name, tg_account_id=tg_account_id)
+        .values(role_id=role_id, tg_account_id=tg_account_id)
     )
     return True
 

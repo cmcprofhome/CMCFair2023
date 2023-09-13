@@ -60,8 +60,8 @@ class DBAdapter:
     def update_telegram_account_username(self, tg_user_id: int, tg_username: str) -> bool:
         return self._commit_session_wrapper(telegram_account.add, tg_user_id, tg_username)
 
-    def add_user(self, role_name: str, tg_user_id: int, user_name: str) -> bool:
-        return self._commit_session_wrapper(user.add, role_name, tg_user_id, user_name)
+    def add_user(self, role_name: str, tg_user_id: int) -> bool:
+        return self._commit_session_wrapper(user.add, role_name, tg_user_id)
 
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         return self._session_wrapper(user.get_by_id, user_id)
@@ -72,8 +72,8 @@ class DBAdapter:
     def check_player_name_availability(self, name: str) -> bool:
         return self._session_wrapper(player.check_name_availability, name)
 
-    def add_player(self, tg_user_id: int) -> bool:
-        return self._commit_session_wrapper(player.add, tg_user_id)
+    def add_player(self, tg_user_id: int, name: str) -> bool:
+        return self._commit_session_wrapper(player.add, tg_user_id, name)
 
     def get_player_by_id(self, player_id: int) -> Optional[Player]:
         return self._session_wrapper(player.get_by_id, player_id)
@@ -114,8 +114,8 @@ class DBAdapter:
     def check_manager_name_availability(self, name: str) -> bool:
         return self._session_wrapper(manager.check_name_availability, name)
 
-    def add_manager(self, tg_user_id: int) -> bool:
-        return self._commit_session_wrapper(manager.add, tg_user_id)
+    def add_manager(self, tg_user_id: int, name: str) -> bool:
+        return self._commit_session_wrapper(manager.add, tg_user_id, name)
 
     def get_manager_by_id(self, manager_id: int) -> Optional[Manager]:
         return self._session_wrapper(manager.get_by_id, manager_id)
