@@ -58,7 +58,9 @@ welcome = "MESSAGES_WELCOME"
 unregistered_help = "MESSAGES_UNREGISTERED_HELP"
 player_help = "MESSAGES_PLAYER_HELP"
 manager_help = "MESSAGES_MANAGER_HELP"
+owner_help = "MESSAGES_OWNER_HELP"
 anti_flood = "MESSAGES_ANTI_FLOOD"
+add_tg_account_error = "MESSAGES_ADD_TG_ACCOUNT_ERROR"
 unknown_error = "MESSAGES_UNKNOWN_ERROR"
 
 [buttons]

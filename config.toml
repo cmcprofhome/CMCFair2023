@@ -58,7 +58,9 @@ welcome = "Welcome"
 unregistered_help = "Unregistered help"
 player_help = "Player help"
 manager_help = "Manager help"
+owner_help = "Owner help"
 anti_flood = "Anti flood"
+add_tg_account_error = "Add telegram account"
 unknown_error = "Unknown error"
 
 [buttons]
