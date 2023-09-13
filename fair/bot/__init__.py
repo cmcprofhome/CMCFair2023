@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Optional
 
 from telebot import TeleBot
@@ -23,6 +24,7 @@ def launch_bot(bot: TeleBot,
         if webhook_config is None:
             raise ValueError('webhook_config is required if use_webhook is True')
         bot.remove_webhook()
+        time.sleep(1)
         bot.set_webhook(
             url=webhook_config.url,
             certificate=webhook_config.cert_path,
@@ -34,6 +36,7 @@ def launch_bot(bot: TeleBot,
         )
     else:
         bot.remove_webhook()
+        time.sleep(1)
         bot.infinity_polling(allowed_updates=allowed_updates, skip_pending=drop_pending)
 
 
