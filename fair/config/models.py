@@ -103,6 +103,7 @@ class MessagesConfig:
     choose_reward_recipient: str
     reward_cancelled: str
     choose_reward_amount: str
+    reward_successful: str
     choose_purchase_recipient: str
     purchase_cancelled: str
     choose_purchase_amount: str
