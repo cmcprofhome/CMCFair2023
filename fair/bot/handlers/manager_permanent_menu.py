@@ -285,7 +285,7 @@ def recipient_page_handler(
         logger: Logger,
         page_size: int,
         **kwargs):
-    collection_name = call.data.split("#")[0]
+    collection_name = call.data.split("#")[0][:-5]  # remove "_page"
     page_idx = int(call.data.split("#")[1])
     try:
         players = db_adapter.get_all_players(offset=page_idx * page_size, limit=page_size)
