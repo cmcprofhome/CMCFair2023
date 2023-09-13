@@ -74,7 +74,7 @@ def money_transfer_recipient_handler(
         buttons: ButtonsConfig,
         logger: Logger,
         **kwargs):
-    recipient_player_id = call.data.split("#")[1]
+    recipient_player_id = int(call.data.split("#")[1])
     logger.debug(f"Player {call.from_user.id} chose a recipient {recipient_player_id} for money transfer")
     bot.add_data(call.from_user.id, call.message.chat.id, recipient_player_id=recipient_player_id)
     bot.set_state(call.from_user.id, PlayerStates.choose_money_transfer_amount, call.message.chat.id)
