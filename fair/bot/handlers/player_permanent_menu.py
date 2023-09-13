@@ -90,7 +90,7 @@ def new_queue_handler(
     else:
         logger.debug(f"Player with tg_id {message.from_user.id} initiated new queue")
         keyboard = keyboards.collection_page(
-            collection=[(location.name, location.id) for location in locations],
+            collection=[(f"{location.name} - {queue}", location.id) for location, queue in locations],
             collection_name='new_queue_locations',
             page_idx=0,
             page_cnt=round(locations_cnt / page_size + 0.5),
