@@ -107,6 +107,14 @@ class MessagesConfig:
     purchase_cancelled: str
     choose_purchase_amount: str
     choose_location: str
+    choose_location_cancelled: str
+    location_updated: str
+    chosen_location: str
+    my_location_queue: str
+    my_location_queue_cancelled: str
+    location_player_chosen_options: str
+    location_paused: str
+    location_unpaused: str
     manager_my_location: str
     manager_left_location: str
     add_player_error: str
@@ -117,6 +125,9 @@ class MessagesConfig:
     money_transfer_amount_invalid_error: str
     add_manager_error: str
     manager_not_on_location_error: str
+    bad_location_error: str
+    pause_location_error: str
+    unpause_location_error: str
     add_user_error: str
     add_tg_account_error: str
     unknown_error: str
