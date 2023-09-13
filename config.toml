@@ -19,7 +19,7 @@ state_storage.type = "redis"
 state_storage.redis.host = "localhost"
 state_storage.redis.port = 6379
 # state_storage.redis.db = 0
-# state_storage.redis.password = "password"
+state_storage.redis.password = "password"
 # state_storage.redis.prefix = "prefix"
 
 webhook.url = "webhook_url"
