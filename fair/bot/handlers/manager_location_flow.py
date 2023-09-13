@@ -117,7 +117,7 @@ def my_location_queue_handler(
         bot.send_message(call.from_user.id, messages.unknown_error)
         return
     else:
-        collection = list((player.user.name, player.id) for player in players)
+        collection = list((player.name, player.id) for player in players)
         keyboard = keyboards.collection_page(
             collection=collection,
             collection_name="my_location_queue",
@@ -153,7 +153,7 @@ def my_location_queue_page_handler(
         bot.send_message(call.from_user.id, messages.unknown_error)
         return
     else:
-        collection = list((player.user.name, player.id) for player in players)
+        collection = list((f"{player.id}", player.id) for player in players)
         keyboard = keyboards.collection_page(
             collection=collection,
             collection_name="my_location_queue",
@@ -277,51 +277,62 @@ def register_handlers(bot: TeleBot):
         choose_location_page_handler,
         func=dummy_true,
         cb_data_pagination="choose_locations_page",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         choose_location_cancel_handler,
         func=dummy_true,
         cb_data="choose_locations_cancel",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         chosen_location_handler,
         func=dummy_true,
         cb_data_pagination="choose_locations",
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         my_location_queue_handler,
         func=dummy_true,
         cb_data="my_location_queue",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         my_location_queue_page_handler,
         func=dummy_true,
         cb_data_pagination="my_location_queue_page",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         my_location_queue_cancel_handler,
         func=dummy_true,
         cb_data="my_location_queue_cancel",
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         my_location_queue_chosen_handler,
         func=dummy_true,
         cb_data_pagination="my_location_queue",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         pause_location_handler,
         func=dummy_true,
         cb_data="pause_location",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
     bot.register_callback_query_handler(
         unpause_location_handler,
         func=dummy_true,
         cb_data="unpause_location",
-        state=ManagerStates().state_list
+        state=ManagerStates().state_list,
+        pass_bot=True
     )
