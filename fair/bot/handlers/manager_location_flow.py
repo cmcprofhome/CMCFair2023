@@ -1,7 +1,7 @@
 from logging import Logger
 
 from telebot import TeleBot
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery
 
 from fair.config import MessagesConfig, ButtonsConfig
 from fair.db import DBAdapter, DBError
