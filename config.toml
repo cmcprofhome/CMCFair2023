@@ -80,6 +80,7 @@ add_player_error = "Add player error"
 add_manager_error = "Add manager error"
 player_not_found_error = "Player not found error"
 player_not_in_queue_error = "Player not in queue error"
+add_user_error = "Add user error"
 add_tg_account_error = "Add telegram account"
 unknown_error = "Unknown error"
 
