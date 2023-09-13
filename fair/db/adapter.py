@@ -192,14 +192,23 @@ class DBAdapter:
     def get_queue_entry_by_player_tg_id(self, tg_user_id: int) -> Optional[QueueEntry]:
         return self._session_wrapper(queue_entry.get_by_player_tg_id, tg_user_id)
 
-    def get_queue_by_location_id(self, location_id: int, offset: int, limit: int) -> list[QueueEntry]:
+    def get_queue_by_location_id(self, location_id: int, offset: int, limit: int) -> list[Player]:
         return self._session_wrapper(queue_entry.get_by_location_id, location_id, offset, limit)
 
-    def get_queue_by_manager_id(self, manager_id: int, offset: int, limit: int) -> list[QueueEntry]:
+    def get_queue_by_manager_id(self, manager_id: int, offset: int, limit: int) -> list[Player]:
         return self._session_wrapper(queue_entry.get_by_manager_id, manager_id, offset, limit)
 
-    def get_queue_by_manager_tg_id(self, tg_user_id: int, offset: int, limit: int) -> list[QueueEntry]:
+    def get_queue_by_manager_tg_id(self, tg_user_id: int, offset: int, limit: int) -> list[Player]:
         return self._session_wrapper(queue_entry.get_by_manager_tg_id, tg_user_id, offset, limit)
+
+    def get_queue_count_by_location_id(self, location_id: int) -> int:
+        return self._session_wrapper(queue_entry.get_count_by_location_id, location_id)
+
+    def get_queue_count_by_manager_id(self, manager_id: int) -> int:
+        return self._session_wrapper(queue_entry.get_count_by_manager_id, manager_id)
+
+    def get_queue_count_by_manager_tg_id(self, tg_user_id: int) -> int:
+        return self._session_wrapper(queue_entry.get_count_by_manager_tg_id, tg_user_id)
 
     def delete_queue_entry_by_player_id(self, player_id: int) -> bool:
         return self._commit_session_wrapper(queue_entry.delete_by_player_id, player_id)
