@@ -1,4 +1,4 @@
-from typing import Optional
+import os
 
 from sanic import Sanic
 
@@ -21,8 +21,11 @@ async def on_shutdown(app: Sanic):
     stop_bot(bot, cfg.use_webhook)
 
 
-def build_app(config_path: str, use_env_vars: bool, config_env_mapping_path: Optional[str] = None) -> Sanic:
+def build_app() -> Sanic:
     app = Sanic("FairBotApp")
+    config_path = os.environ.get('CONFIG_PATH', './config.toml')
+    use_env_vars = os.environ.get('USE_ENV_VARS', True)
+    config_env_mapping_path = os.environ.get('CONFIG_ENV_MAPPING_PATH', None)
     cfg = load_config(config_path, use_env_vars, config_env_mapping_path)
     app.ctx['bot_config'] = cfg.bot
     db_logger = setup_logger(cfg.db.logger)
