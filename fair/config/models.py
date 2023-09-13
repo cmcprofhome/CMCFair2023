@@ -73,6 +73,11 @@ class MessagesConfig:
     invalid_player_name: str
     player_name_already_taken: str
     player_registered: str
+    player_balance: str
+    choose_money_transfer_recipient: str
+    choose_new_queue_location: str
+    player_queue_location: str
+    player_left_queue: str
     manager_registration_forbidden: str
     manager_registration_disabled: str
     get_manager_password: str
@@ -81,6 +86,8 @@ class MessagesConfig:
     manager_name_already_taken: str
     manager_registered: str
     add_player_error: str
+    player_not_found_error: str
+    player_not_in_queue_error: str
     add_manager_error: str
     add_tg_account_error: str
     unknown_error: str
@@ -93,6 +100,10 @@ class ButtonsConfig:
     new_queue: str
     my_balance: str
     transfer_money: str
+    my_queue: str
+    leave_queue: str
+    prev_page: str
+    next_page: str
     list_all_players: str
     list_all_locations: str
     add_balance: str
