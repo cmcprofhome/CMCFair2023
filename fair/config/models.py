@@ -103,9 +103,11 @@ class MessagesConfig:
     choose_reward_recipient: str
     reward_cancelled: str
     choose_reward_amount: str
+    reward_successful: str
     choose_purchase_recipient: str
     purchase_cancelled: str
     choose_purchase_amount: str
+    purchase_successful: str
     choose_location: str
     choose_location_cancelled: str
     location_updated: str
@@ -128,6 +130,9 @@ class MessagesConfig:
     bad_location_error: str
     pause_location_error: str
     unpause_location_error: str
+    bad_player_balance_error: str
+    bad_chosen_player_error: str
+    bad_manager_error: str
     add_user_error: str
     add_tg_account_error: str
     unknown_error: str
@@ -153,6 +158,7 @@ class ButtonsConfig:
     my_location_queue: str
     leave_location: str
     pause_location: str
+    unpause_location: str
     prev_page: str
     next_page: str
     help: str

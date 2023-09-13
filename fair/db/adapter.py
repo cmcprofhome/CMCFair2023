@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from fair.db.exceptions import DBError
 from fair.db.models import (
-    Role, TelegramAccount,
+    TelegramAccount,
     User, Player, Manager,
     ManagersBlacklistRecord,
     Location, Shop,
