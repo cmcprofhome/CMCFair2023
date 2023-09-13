@@ -57,7 +57,7 @@ def get_all(session: Session, offset: int, limit: int) -> list[Player]:
 
 def get_all_count(session: Session) -> int:
     players_cnt = session.execute(
-        select(func.count(Player))
+        select(func.count(Player.id))
     ).first()
     return players_cnt[0]
 

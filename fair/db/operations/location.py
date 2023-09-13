@@ -56,7 +56,7 @@ def get_all(session: Session, offset: int, limit: int) -> list[tuple[Location, i
 
 def get_all_count(session: Session) -> int:
     locations_cnt = session.execute(
-        select(func.count(Location))
+        select(func.count(Location.id))
     ).first()
     return locations_cnt[0]
 
@@ -76,7 +76,7 @@ def get_all_active(session: Session, offset: int, limit: int) -> list[tuple[Loca
 
 def get_all_active_count(session: Session) -> int:
     locations_cnt = session.execute(
-        select(func.count(Location))
+        select(func.count(Location.id))
         .where(Location.is_active is True)
     ).first()
     return locations_cnt[0]
