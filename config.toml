@@ -5,6 +5,7 @@ drop_pending = true
 use_webhook = false
 use_class_middlewares = true
 actions_timeout = 0.2
+page_size = 10
 
 logger.name = "BotLogger"
 logger.level = "INFO"
@@ -57,12 +58,14 @@ welcome = "Welcome"
 unregistered_help = "Unregistered help"
 player_help = "Player help"
 manager_help = "Manager help"
+owner_help = "Owner help"
 anti_flood = "Anti flood"
 get_player_name = "Get player name"
 invalid_player_name = "Invalid player name"
 player_name_already_taken = "Player name already taken"
-add_player_error = "Add player error"
 player_registered = "Player registered"
+add_player_error = "Add player error"
+add_tg_account_error = "Add telegram account"
 unknown_error = "Unknown error"
 
 [buttons]
