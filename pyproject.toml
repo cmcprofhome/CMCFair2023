@@ -12,7 +12,7 @@ description = "CMC Fair 2023 bot"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "adaptix>=3.0.0",
+    "adaptix>=3.0.0a5",
     "pytelegrambotapi>=4.13.0",
     "redis>=5.0.0",
     "sqlalchemy>=2.0.20",
@@ -30,5 +30,6 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/Cub11k/CMCFair2023"
 
-[tool.setuptools]
-packages = ["fair"]
+[tool.setuptools.packages.find]
+include = ["fair"]
+namespaces = false
