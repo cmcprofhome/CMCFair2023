@@ -7,6 +7,7 @@ from fair.bot.handlers import (
     player_registration_flow,
     manager_registration_flow,
     player_permanent_menu,
+    player_queue_flow,
 )
 
 
@@ -16,3 +17,4 @@ def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
     player_registration_flow.register_handlers(bot)
     manager_registration_flow.register_handlers(bot)
     player_permanent_menu.register_handlers(bot, buttons)
+    player_queue_flow.register_handlers(bot)

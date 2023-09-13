@@ -76,6 +76,8 @@ class MessagesConfig:
     player_balance: str
     choose_money_transfer_recipient: str
     choose_new_queue_location: str
+    new_queue_location_cancelled: str
+    queue_entry_added: str
     player_queue_location: str
     player_left_queue: str
     manager_registration_forbidden: str
@@ -88,6 +90,7 @@ class MessagesConfig:
     add_player_error: str
     player_not_found_error: str
     player_not_in_queue_error: str
+    queue_entry_already_exists_error: str
     add_manager_error: str
     add_user_error: str
     add_tg_account_error: str
