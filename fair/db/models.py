@@ -56,7 +56,7 @@ class Player(BaseModel):
 
     # Relationships
     user = relationship("User")
-    queue = relationship("Queue")
+    queue_entry = relationship("QueueEntry")
     finished_locations = relationship("FinishedLocation")
 
 
@@ -94,9 +94,10 @@ class Location(BaseModel):
     name = mapped_column(String(255), unique=True, nullable=False)
     max_reward = mapped_column(Integer,  CheckConstraint('max_reward >= 0'), default=100, nullable=False)
     is_onetime = mapped_column(Boolean, default=False, nullable=False)
+    is_active = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
-    queues = relationship("Queue")
+    queue = relationship("QueueEntry")
 
 
 class Shop(BaseModel):
@@ -113,7 +114,7 @@ class Shop(BaseModel):
     location = relationship("Location")
 
 
-class Queue(BaseModel):
+class QueueEntry(BaseModel):
     __tablename__ = 'queues'
 
     # PK and FKs
