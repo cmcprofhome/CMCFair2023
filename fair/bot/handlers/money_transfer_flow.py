@@ -157,7 +157,7 @@ def register_handlers(bot: TeleBot):
     bot.register_callback_query_handler(
         money_transfer_recipient_cancel_handler,
         func=dummy_true,
-        cb_data="transfer_recipient_cancel",
+        cb_data="transfer_recipients_cancel",
         state=PlayerStates.choose_money_transfer_recipient,
         pass_bot=True
     )
