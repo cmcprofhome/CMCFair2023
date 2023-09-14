@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, delete
 from sqlalchemy.orm import Session
 
 from fair.db.models import Role, TelegramAccount, User
@@ -37,3 +37,16 @@ def get_by_tg_id(session: Session, tg_user_id: int) -> Optional[User]:
         .where(TelegramAccount.tg_user_id == tg_user_id)
     ).first()
     return user if user is None else user[0]
+
+
+def delete_by_tg_id(session: Session, tg_user_id: int) -> bool:
+    session.execute(
+        delete(User)
+        .where(
+            User.tg_account_id == (
+                select(TelegramAccount.id)
+                .where(TelegramAccount.tg_user_id == tg_user_id)
+            ).scalar_subquery()
+        )
+    )
+    return True

@@ -32,6 +32,7 @@ def reset_handler(
         db_adapter.update_manager_location_by_tg_id(message.from_user.id, None)
         db_adapter.delete_player_by_tg_id(message.from_user.id)
         db_adapter.delete_manager_by_tg_id(message.from_user.id)
+        db_adapter.delete_user_by_tg_id(message.from_user.id)
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)

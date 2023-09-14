@@ -267,3 +267,6 @@ class DBAdapter:
 
     def delete_manager_by_tg_id(self, tg_user_id: int) -> bool:
         return self._commit_session_wrapper(manager.delete_by_tg_id, tg_user_id)
+
+    def delete_user_by_tg_id(self, tg_user_id: int) -> bool:
+        return self._commit_session_wrapper(user.delete_by_tg_id, tg_user_id)
