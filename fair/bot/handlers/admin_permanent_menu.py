@@ -37,7 +37,7 @@ def reset_handler(
         bot.send_message(message.chat.id, messages.unknown_error)
         return
     else:
-        bot.send_message(message.chat.id, messages.welcome)
+        bot.send_message(message.chat.id, "Press /start to start again", reply_markup=keyboards.remove_reply())
 
 
 def register_handlers(bot: TeleBot):
