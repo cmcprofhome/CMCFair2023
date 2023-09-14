@@ -135,6 +135,7 @@ def leave_queue_handler(
         message: Message,
         bot: TeleBot,
         messages: MessagesConfig,
+        buttons: ButtonsConfig,
         db_adapter: DBAdapter,
         logger: Logger,
         **kwargs):
@@ -150,7 +151,13 @@ def leave_queue_handler(
             bot.send_message(message.chat.id, messages.player_not_in_queue_error)
         else:
             logger.debug(f"Player with tg_id {message.from_user.id} left queue")
-            bot.send_message(message.chat.id, messages.player_left_queue)
+            keyboard = keyboards.player_main_menu(
+                new_queue_btn=buttons.new_queue,
+                my_balance_btn=buttons.my_balance,
+                transfer_money_btn=buttons.transfer_money,
+                help_btn=buttons.help
+            )
+            bot.send_message(message.chat.id, messages.player_left_queue, reply_markup=keyboard)
 
 
 def register_handlers(bot: TeleBot, buttons: ButtonsConfig):
