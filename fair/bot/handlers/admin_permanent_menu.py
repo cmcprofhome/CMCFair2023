@@ -41,4 +41,4 @@ def reset_handler(
 
 
 def register_handlers(bot: TeleBot):
-    bot.register_message_handler(reset_handler, commands=['reset'])
+    bot.register_message_handler(reset_handler, commands=['reset'], pass_bot=True)
