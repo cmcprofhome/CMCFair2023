@@ -1,1 +1,1 @@
-web: sanic fair:build_app --factory --host=0.0.0.0 --port=$PORT --workers=1
+web: gunicorn "fair:build_app()" --bind=0.0.0.0:$PORT --worker-class aiohttp.GunicornWebWorker
