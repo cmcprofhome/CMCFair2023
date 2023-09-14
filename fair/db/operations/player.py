@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from sqlalchemy import select, insert, update, func, ScalarSelect
+from sqlalchemy import select, insert, update, delete, func, ScalarSelect
 from sqlalchemy.orm import Session
 
 from fair.db.models import TelegramAccount, User, Player
@@ -115,3 +115,17 @@ def transfer_by_tg_id(session: Session, from_user_tg_id: int, to_user_tg_id: int
         .where(TelegramAccount.tg_user_id == to_user_tg_id)
     ).scalar_subquery()
     return transfer_by_id(session, from_player_id, to_player_id, amount)
+
+
+def delete_by_tg_id(session: Session, tg_user_id: int) -> bool:
+    player_id = (
+        select(Player.id)
+        .join(User)
+        .join(TelegramAccount)
+        .where(TelegramAccount.tg_user_id == tg_user_id)
+    ).scalar_subquery()
+    result = session.execute(
+        delete(Player)
+        .where(Player.id == player_id)
+    ).rowcount
+    return result != 0

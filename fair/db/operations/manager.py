@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from sqlalchemy import select, insert, update, ScalarSelect
+from sqlalchemy import select, insert, update, delete, ScalarSelect
 from sqlalchemy.orm import Session
 
 from fair.db.models import TelegramAccount, User, Manager, Location
@@ -81,3 +81,17 @@ def update_location_by_tg_id(session: Session, tg_user_id: int, new_location_id:
         .where(TelegramAccount.tg_user_id == tg_user_id)
     ).scalar_subquery()
     return update_location_by_id(session, manager_id, new_location_id)
+
+
+def delete_by_tg_id(session: Session, tg_user_id: int) -> bool:
+    manager_id = (
+        select(Manager.id)
+        .join(User)
+        .join(TelegramAccount)
+        .where(TelegramAccount.tg_user_id == tg_user_id)
+    ).scalar_subquery()
+    result = session.execute(
+        delete(Manager)
+        .where(Manager.id == manager_id)
+    ).rowcount
+    return result != 0

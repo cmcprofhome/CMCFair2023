@@ -261,3 +261,9 @@ class DBAdapter:
             except DBError:
                 pass  # suppress error
         return balance_updated
+
+    def delete_player_by_tg_id(self, tg_user_id: int) -> bool:
+        return self._commit_session_wrapper(player.delete_by_tg_id, tg_user_id)
+
+    def delete_manager_by_tg_id(self, tg_user_id: int) -> bool:
+        return self._commit_session_wrapper(manager.delete_by_tg_id, tg_user_id)
