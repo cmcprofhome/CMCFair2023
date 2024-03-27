@@ -2,7 +2,7 @@ import logging
 
 from telebot import TeleBot
 
-from fair.db import DBAdapter
+from fair.db import sessionmaker
 from fair.config import MessagesConfig, ButtonsConfig
 
 from fair.bot.middlewares.message_antiflood import MessageAntiFloodMiddleware
@@ -14,7 +14,8 @@ def setup_middlewares(
         bot: TeleBot,
         timeout_message: str,
         timeout: float,
-        db_adapter: DBAdapter,
+        db_session_maker: sessionmaker,
+        db_logger: logging.Logger,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
         logger: logging.Logger,
@@ -22,5 +23,5 @@ def setup_middlewares(
     # setup all middlewares here
     bot.setup_middleware(MessageAntiFloodMiddleware(bot, timeout_message, timeout))
     bot.setup_middleware(CallbackQueryAntiFloodMiddleware(bot, timeout_message, timeout))
-    bot.setup_middleware(ExtraArgumentsMiddleware(db_adapter, messages, buttons, logger, page_size))
+    bot.setup_middleware(ExtraArgumentsMiddleware(db_session_maker, db_logger, messages, buttons, logger, page_size))
     pass

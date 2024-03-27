@@ -5,7 +5,7 @@ from typing import Optional
 from telebot import TeleBot
 
 from fair.config import BotConfig, BotWebhookConfig, MessagesConfig, ButtonsConfig
-from fair.db import DBAdapter
+from fair.db import sessionmaker
 
 from fair.bot.filters import add_custom_filters
 from fair.bot.handlers import register_handlers
@@ -56,7 +56,8 @@ def stop_bot(bot: TeleBot, use_webhook: bool):
 
 def setup_bot(
         bot_config: BotConfig,
-        db_adapter: DBAdapter,
+        db_session_maker: sessionmaker,
+        db_logger: logging.Logger,
         messages: MessagesConfig,
         buttons: ButtonsConfig,
         logger: logging.Logger):
@@ -69,7 +70,8 @@ def setup_bot(
             bot,
             messages.anti_flood,
             bot_config.actions_timeout,
-            db_adapter,
+            db_session_maker,
+            db_logger,
             messages,
             buttons,
             logger,
