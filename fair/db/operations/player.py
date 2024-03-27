@@ -96,8 +96,6 @@ def transfer_by_id(session: Session,
             .where(Player.id == to_player_id)
             .values(balance=Player.balance + amount)
         ).rowcount
-    if result == 0:
-        session.rollback()
     return result != 0
 
 

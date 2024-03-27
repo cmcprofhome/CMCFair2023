@@ -68,8 +68,6 @@ def update_location_by_id(
             .where(Manager.id == manager_id)
             .values(location_id=new_location_id)
         ).rowcount
-    if result == 0:
-        session.rollback()
     return result != 0
 
 
