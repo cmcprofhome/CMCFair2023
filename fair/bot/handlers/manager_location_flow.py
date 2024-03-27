@@ -70,9 +70,11 @@ def chosen_location_handler(
         manager_location_updated = False
         if location is not None:
             manager_location_updated = db_adapter.update_manager_location_by_tg_id(call.from_user.id, location_id)
+            db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(call.from_user.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if manager_location_updated is False:
@@ -227,9 +229,11 @@ def pause_location_handler(
         **kwargs):
     try:
         location_paused = db_adapter.update_location_by_manager_tg_id(call.from_user.id, is_active=False)
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(call.from_user.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if location_paused is False:
@@ -253,9 +257,11 @@ def unpause_location_handler(
         **kwargs):
     try:
         location_unpaused = db_adapter.update_location_by_manager_tg_id(call.from_user.id, is_active=True)
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(call.from_user.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if location_unpaused is False:

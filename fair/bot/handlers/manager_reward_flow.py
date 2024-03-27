@@ -46,9 +46,11 @@ def reward_handler(
                     amount = int(message.text)
                     try:
                         balance_status = db_adapter.reward_by_player_id(current_player_id, manager.id, amount)
+                        db_adapter.session.commit()
                     except DBError as e:
                         logger.error(e)
                         bot.send_message(message.chat.id, messages.unknown_error)
+                        db_adapter.session.rollback()
                         return
                     else:
                         if balance_status:

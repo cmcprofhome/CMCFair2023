@@ -59,9 +59,11 @@ def player_name_handler(
             return
     try:
         user_added = db_adapter.add_user("player", message.from_user.id)  # add User
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if user_added is False:
@@ -75,9 +77,11 @@ def player_name_handler(
             logger.debug(f"User added: {message.from_user.id}, {message.text}")
     try:
         player_added = db_adapter.add_player(message.from_user.id, message.text)  # add Player
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if player_added is False:

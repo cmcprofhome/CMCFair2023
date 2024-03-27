@@ -112,9 +112,11 @@ def money_transfer_amount_handler(
             money_transferred = False
             if player is not None:
                 money_transferred = db_adapter.transfer_by_player_id(player.id, recipient_player_id, int(message.text))
+                db_adapter.session.commit()
         except DBError as e:
             logger.error(e)
             bot.send_message(chat_id=message.chat.id, text=messages.unknown_error)
+            db_adapter.session.rollback()
             return
         else:
             if money_transferred is False:

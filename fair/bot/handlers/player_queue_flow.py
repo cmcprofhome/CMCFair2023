@@ -36,9 +36,11 @@ def new_queue_location_handler(
     location_id = int(call.data.split("#")[1])
     try:
         queue_entry_added = db_adapter.add_queue_entry_by_player_tg_id(call.from_user.id, location_id)
+        db_adapter.session.commit()
     except DBError as e:
-        logger.error(f"{e}")
+        logger.error(e)
         bot.answer_callback_query(call.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if queue_entry_added is False:
@@ -73,7 +75,7 @@ def new_queue_locations_page_handler(
         locations = db_adapter.get_all_active_locations(offset=page_idx * page_size, limit=page_size)
         locations_cnt = db_adapter.get_all_active_locations_count()
     except DBError as e:
-        logger.error(f"{e}")
+        logger.error(e)
         bot.answer_callback_query(call.id, messages.unknown_error)
         return
     else:

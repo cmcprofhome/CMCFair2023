@@ -40,9 +40,11 @@ def start_handler(
                     message.chat.id,
                     message.from_user.username
                 )
+                db_adapter.session.commit()
             except DBError as e:
                 logger.error(e)
                 bot.send_message(message.chat.id, messages.unknown_error)
+                db_adapter.session.rollback()
                 return
             else:
                 if tg_account_added is False:

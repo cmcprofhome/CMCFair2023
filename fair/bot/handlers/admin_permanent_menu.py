@@ -33,9 +33,11 @@ def reset_handler(
         db_adapter.delete_player_by_tg_id(message.from_user.id)
         db_adapter.delete_manager_by_tg_id(message.from_user.id)
         db_adapter.delete_user_by_tg_id(message.from_user.id)
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         bot.send_message(message.chat.id, "Press /start to start again", reply_markup=keyboards.remove_reply())

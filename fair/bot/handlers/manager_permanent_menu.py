@@ -431,9 +431,11 @@ def leave_location_handler(
         **kwargs):
     try:
         manager_location_updated = db_adapter.update_manager_location_by_tg_id(message.from_user.id, None)
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if manager_location_updated is False:

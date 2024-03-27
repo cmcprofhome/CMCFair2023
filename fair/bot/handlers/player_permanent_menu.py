@@ -141,9 +141,11 @@ def leave_queue_handler(
         **kwargs):
     try:
         queue_entry_deleted = db_adapter.delete_queue_entry_by_player_tg_id(message.from_user.id)
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if queue_entry_deleted is False:

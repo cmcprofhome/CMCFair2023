@@ -80,9 +80,11 @@ def manager_password_handler(
             if password_retries == 2:
                 try:
                     db_adapter.add_managers_blacklist_record(message.from_user.id)
+                    db_adapter.session.commit()
                 except DBError as e:
                     logger.error(e)
                     bot.send_message(message.chat.id, messages.unknown_error)
+                    db_adapter.session.rollback()
                     return
                 else:
                     logger.debug(f"{message.from_user.id} trying to register as a manager is now in blacklist")
@@ -123,9 +125,11 @@ def manager_name_handler(
             return
     try:
         user_added = db_adapter.add_user("manager", message.from_user.id)  # add User
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if user_added is False:
@@ -139,9 +143,11 @@ def manager_name_handler(
             logger.debug(f"User added: {message.from_user.id}, {message.text}")
     try:
         manager_added = db_adapter.add_manager(message.from_user.id, message.text)  # add Manager
+        db_adapter.session.commit()
     except DBError as e:
         logger.error(e)
         bot.send_message(message.chat.id, messages.unknown_error)
+        db_adapter.session.rollback()
         return
     else:
         if manager_added is False:
