@@ -69,20 +69,31 @@ def add_location_handler(
         db_adapter: DBAdapter,
         logger: Logger,
         **kwargs):
-    name, max_reward, is_onetime = extract_arguments(message.text).split()
+    args = extract_arguments(message.text).split()
+    name = None
+    max_reward = None
+    is_onetime = None
+    if len(args) >= 3:
+        name = " ".join(args[:-2])
+        max_reward = args[-2]
+        is_onetime = args[-1]
     if name and max_reward and max_reward.isdigit() and is_onetime in ["True", "False", "true", "false", "1", "0"]:
         try:
-            db_adapter.add_location(name, int(max_reward), bool(is_onetime))
-            db_adapter.session.commit()
-            logger.debug(f"{message.from_user.id} added location: "
+            logger.debug(f"{message.from_user.id} tried to add location: "
                          f"{name}, max_reward: {max_reward}, is_onetime: {is_onetime}")
+            location_added = db_adapter.add_location(name, int(max_reward), bool(is_onetime))
+            db_adapter.session.commit()
         except DBError as e:
             logger.error(e)
             bot.send_message(message.chat.id, messages.unknown_error)
             db_adapter.session.rollback()
             return
         else:
-            bot.send_message(message.chat.id, messages.location_added)
+            if location_added:
+                logger.debug(f"{message.from_user.id} added location: {name}")
+                bot.send_message(message.chat.id, messages.location_added)
+            else:
+                bot.send_message(message.chat.id, messages.add_location_error)
     else:
         bot.send_message(message.chat.id, messages.invalid_add_location_args)
 
