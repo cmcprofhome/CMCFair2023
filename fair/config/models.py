@@ -119,6 +119,10 @@ class MessagesConfig:
     location_unpaused: str
     manager_my_location: str
     manager_left_location: str
+    manager_password_set: str
+    manager_password_reset: str
+    location_added: str
+    invalid_add_location_args: str
     add_player_error: str
     player_not_found_error: str
     player_not_in_queue_error: str
