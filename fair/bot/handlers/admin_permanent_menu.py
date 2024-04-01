@@ -81,7 +81,7 @@ def add_location_handler(
         try:
             logger.debug(f"{message.from_user.id} tried to add location: "
                          f"{name}, max_reward: {max_reward}, is_onetime: {is_onetime}")
-            location_added = db_adapter.add_location(name, int(max_reward), bool(is_onetime))
+            location_added = db_adapter.add_location(name, int(max_reward), is_onetime in ["True", "true", "1"])
             db_adapter.session.commit()
         except DBError as e:
             logger.error(e)
